@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import Qt.labs.settings
 import Components
 import "DeviceManager"
 
@@ -30,6 +31,15 @@ ApplicationWindow {
     property var groups: viewMode === "type"
         ? DeviceManager.typeGroups
         : DeviceManager.connectionGroups
+
+    // width of the details pane; adjustable by dragging the divider
+    property real detailsPaneWidth: 470
+
+    // persisted across runs via QSettings (same store as theme/language)
+    Settings {
+        id: appSettings
+        property real detailsPaneWidth: 470
+    }
 
     function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
 
@@ -76,7 +86,11 @@ ApplicationWindow {
             propertiesDialog.open()
     }
 
-    Component.onCompleted: root.lastScanTime = new Date().toLocaleTimeString(Qt.locale(), Locale.ShortFormat)
+    Component.onCompleted: {
+        if (appSettings.detailsPaneWidth > 0)
+            root.detailsPaneWidth = appSettings.detailsPaneWidth
+        root.lastScanTime = new Date().toLocaleTimeString(Qt.locale(), Locale.ShortFormat)
+    }
 
     // When the device list is re-enumerated (e.g. after a language switch or a
     // manual scan), re-resolve the selected device so the details pane shows the
@@ -286,6 +300,7 @@ ApplicationWindow {
 
         // ---- content ------------------------------------------------------
         RowLayout {
+            id: contentRow
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 8
@@ -294,6 +309,7 @@ ApplicationWindow {
             StyledRectangle {
                 contentLayer: StyledRectangle.ContentLayer.Pane
                 Layout.fillWidth: true
+                Layout.minimumWidth: 260
                 Layout.fillHeight: true
                 radius: Appearance.rounding.windowRounding - 8
                 clip: true
@@ -324,10 +340,46 @@ ApplicationWindow {
                 }
             }
 
+            // draggable divider between the tree and the details pane
+            Item {
+                id: splitter
+                Layout.fillHeight: true
+                Layout.preferredWidth: 12
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 2
+                    height: parent.height - 28
+                    radius: 1
+                    color: splitterMouse.pressed || splitterMouse.containsMouse
+                        ? Appearance.colors.colOutline
+                        : Appearance.colors.colOutlineVariant
+                }
+
+                MouseArea {
+                    id: splitterMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.SizeHorCursor
+                    onPositionChanged: {
+                        if (!pressed)
+                            return
+                        // map into the content row so the boundary tracks the
+                        // cursor exactly even while the divider itself moves
+                        var pos = splitterMouse.mapToItem(contentRow, mouse.x, mouse.y)
+                        var maxWidth = Math.max(340, contentRow.width - 320)
+                        root.detailsPaneWidth = Math.max(340, Math.min(maxWidth,
+                            contentRow.width - pos.x - splitter.width / 2 - contentRow.spacing))
+                    }
+                    onReleased: appSettings.detailsPaneWidth = root.detailsPaneWidth
+                }
+            }
+
             // details
             StyledRectangle {
                 contentLayer: StyledRectangle.ContentLayer.Pane
-                Layout.preferredWidth: 470
+                Layout.preferredWidth: root.detailsPaneWidth
                 Layout.minimumWidth: 340
                 Layout.fillHeight: true
                 radius: Appearance.rounding.windowRounding - 8
