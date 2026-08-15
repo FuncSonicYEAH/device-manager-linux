@@ -78,6 +78,17 @@ ApplicationWindow {
 
     Component.onCompleted: root.lastScanTime = new Date().toLocaleTimeString(Qt.locale(), Locale.ShortFormat)
 
+    // When the device list is re-enumerated (e.g. after a language switch or a
+    // manual scan), re-resolve the selected device so the details pane shows the
+    // freshly translated data instead of the stale pre-switch snapshot.
+    Connections {
+        target: DeviceManager
+        function onGroupsChanged() {
+            if (root.selectedDeviceId !== "")
+                root.selectedDevice = root.findDevice(root.selectedDeviceId)
+        }
+    }
+
 
     ColumnLayout {
         anchors {

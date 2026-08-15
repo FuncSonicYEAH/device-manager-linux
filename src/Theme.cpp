@@ -183,8 +183,11 @@ void Theme::setThemeMode(const QString &mode)
                 buildDarkPalette();
             else
                 buildLightPalette();
-            rebuildDerivedColors();
         }
+        // Rebuild the derived Appearance.colors.* tokens (layers, hover/active
+        // states, ...) from the refreshed m3 tokens in both branches, otherwise
+        // toggling back to "system" leaves the widgets in the previous scheme.
+        rebuildDerivedColors();
         QSettings().setValue(QStringLiteral("themeMode"), QStringLiteral("system"));
         emit themeModeChanged();
         emit darkModeChanged();
