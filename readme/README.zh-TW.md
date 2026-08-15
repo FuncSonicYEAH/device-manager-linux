@@ -1,0 +1,105 @@
+# 裝置管理員 (Device Manager)
+
+一個類似 Windows 裝置管理員的硬體瀏覽器，基於 **Qt 6 Quick + C++ + Meson** 建置。
+UI 沿用 **Material 3** 設計（illogical-impulse 的 "ii" 主題）；
+後端從 Linux **sysfs** 列舉真實硬體。
+
+> [English](../README.md) · [简体中文](README.zh-CN.md) · **繁體中文** · [日本語](README.ja.md) · [Русский](README.ru.md)
+
+## 相依套件
+
+建置工具：meson、ninja、C++17 編譯器、pkg-config。
+
+Qt 6 模組：Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
+（外加 Wayland 平台外掛程式）。
+
+### Fedora
+
+```sh
+sudo dnf install meson ninja-build gcc-c++ \
+  qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
+```
+
+### Ubuntu / Debian
+
+```sh
+sudo apt install meson ninja-build g++ pkg-config \
+  qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
+```
+
+### Arch Linux
+
+```sh
+sudo pacman -S --needed meson ninja gcc \
+  qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
+```
+
+### openSUSE
+
+```sh
+sudo zypper install meson ninja gcc-c++ \
+  qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
+```
+
+### Alpine Linux
+
+```sh
+sudo apk add meson ninja g++ pkgconfig \
+  qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
+```
+
+### Gentoo
+
+```sh
+sudo emerge --ask dev-util/meson dev-util/ninja sys-devel/gcc \
+  dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
+```
+
+### 字型
+
+介面文字為中文，建議透過 fontconfig 安裝 Noto Sans / Noto Sans CJK 字型。
+**Material Symbols Rounded** 圖示字型已內嵌至程式資源（`qml/fonts/`），啟動時透過
+`QFontDatabase::addApplicationFont` 直接註冊，無需系統安裝。
+
+## 建置
+
+```sh
+meson setup build
+ninja -C build
+```
+
+## 執行
+
+```sh
+./build/device-manager                        # 預設 Wayland（無法使用時自動回退 X11）
+QT_QPA_PLATFORM=xcb ./build/device-manager    # 強制 X11
+./build/device-manager --dump                 # 列印裝置清單
+./build/device-manager --screenshot out.png [--light]  # 離屏渲染截圖（除錯用）
+./build/device-manager --fontinfo             # 檢視內嵌字型註冊狀態（除錯用）
+```
+
+## 專案結構
+
+- `src/DeviceManager.*` — sysfs 列舉引擎（裝置解析、廠商/驅動程式名稱對應表、分組檢視）
+- `src/Theme.*`, `src/ColorUtils.*` — Material 3 主題層（`Appearance` / `ColorUtils` 內容屬性）
+- `qml/Components/` — Material 3 元件庫（`Components` QML 模組）
+- `qml/fonts/` — 內嵌的 Material Symbols Rounded 變數字型
+- `qml/Main.qml` — 主視窗（標題列 / 工具列 / 裝置樹 / 詳細資料面板 / 狀態列）
+- `qml/DeviceManager/` — 應用程式頁面：裝置清單、詳細資料面板、內容對話方塊、狀態徽章、屬性清單
+
+## 備註
+
+- 裝置資訊來自 `/sys/class`、`/sys/bus` 與 `/proc/cpuinfo`；廠商/驅動程式名為內建小型
+  對應表，未收錄的顯示原始 ID（如 `0x10ec`）。
+- 狀態判定：`power/runtime_status`（已暫停）、網路卡 `carrier`（未連接）、`rfkill`（已停用）。
+- 主題跟隨系統配色方案（`QStyleHints::colorScheme`）；手動切換深/淺色後保留使用者選擇。
+- Wayland 需要 `qt6-wayland`；同時設定 `DISPLAY` 與 `WAYLAND_DISPLAY` 時 Qt 預設選 xcb，
+  因此應用程式本身會設定 `QT_QPA_PLATFORM=wayland;xcb`。
+
+## 授權條款
+
+- 專案程式碼：**GNU GPL v3** —— 參見 [LICENSE](../LICENSE)。
+- 第三方元件：
+  - **Material Symbols Rounded** 字型 —— [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)（Google）
+  - **M3 形狀引擎**（`qml/Components/shapes/`）—— Apache License 2.0（見 `qml/Components/shapes/LICENSE`）
+  - **UI 元件** —— 移植自 illogical-impulse 的 quickshell "ii" 主題（[end-4/dots-hyprland](https://github.com/end-4/dots-hyprland)），GNU GPL v3 授權。
