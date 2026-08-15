@@ -56,13 +56,6 @@ sudo emerge --ask dev-util/meson dev-util/ninja sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
-### フォント
-
-UI のラベルは中国語のため、fontconfig 経由で Noto Sans / Noto Sans CJK フォントを
-インストールすることを推奨します。**Material Symbols Rounded** アイコンフォントは
-プログラムのリソース（`qml/fonts/`）に同梱され、起動時に
-`QFontDatabase::addApplicationFont` で直接登録されるため、システムへのインストールは不要です。
-
 ## ビルド
 
 ```sh

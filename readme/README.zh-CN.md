@@ -55,12 +55,6 @@ sudo emerge --ask dev-util/meson dev-util/ninja sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
-### 字体
-
-界面文字为中文，建议通过 fontconfig 安装 Noto Sans / Noto Sans CJK 字体。
-**Material Symbols Rounded** 图标字体已内嵌到程序资源中（`qml/fonts/`），启动时通过
-`QFontDatabase::addApplicationFont` 直接注册，无需系统安装。
-
 ## 构建
 
 ```sh

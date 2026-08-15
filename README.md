@@ -55,13 +55,6 @@ sudo emerge --ask dev-util/meson dev-util/ninja sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
-### Fonts
-
-The UI labels are Chinese, so a Noto Sans / Noto Sans CJK font installed via fontconfig
-is recommended. The **Material Symbols Rounded** icon font is bundled in the program
-resources (`qml/fonts/`) and registered at startup through
-`QFontDatabase::addApplicationFont`, so a system-wide install is not required.
-
 ## Build
 
 ```sh
