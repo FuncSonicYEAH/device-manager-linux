@@ -11,10 +11,14 @@ Translator::Translator(QObject *parent)
 {
     loadAllDictionaries();
     m_language = detectSystemLanguage();
-    const QSettings settings; // TEST: constructor read only
+    const QSettings settings;
     const QString saved = settings.value(QStringLiteral("language")).toString();
     if (m_codes.contains(saved))
         m_language = saved;
+    // First run: the config file does not exist yet, so record the effective
+    // (default) language to create it and make the choice restorable later.
+    if (!settings.contains(QStringLiteral("language")))
+        QSettings().setValue(QStringLiteral("language"), m_language);
 }
 
 static Translator *g_translator = nullptr;
@@ -68,7 +72,16 @@ void Translator::loadAllDictionaries()
 
 void Translator::setLanguage(const QString &code)
 {
-    if (!m_codes.contains(code) || code == m_language)
+    setLanguage(code, true);
+}
+
+void Translator::setLanguage(const QString &code, bool save)
+{
+    if (!m_codes.contains(code))
+        return;
+    if (save)
+        QSettings().setValue(QStringLiteral("language"), code);
+    if (code == m_language)
         return;
     m_language = code;
     emit languageChanged();

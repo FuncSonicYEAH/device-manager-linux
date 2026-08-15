@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     // Optional: force a UI language for testing (e.g. --lang en)
     for (int i = 1; i < argc - 1; ++i) {
         if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--lang"))
-            Translator::instance()->setLanguage(QString::fromLocal8Bit(argv[i + 1]));
+            Translator::instance()->setLanguage(QString::fromLocal8Bit(argv[i + 1]), false);
     }
 
     ColorUtils colorUtils;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
                     return;
                 }
                 if (!switchLang.isEmpty()) {
-                    Translator::instance()->setLanguage(switchLang);
+                    Translator::instance()->setLanguage(switchLang, false);
                     if (qEnvironmentVariableIsSet("DM_NO_GRAB2"))
                         QTimer::singleShot(3000, []() { qApp->quit(); });
                     else

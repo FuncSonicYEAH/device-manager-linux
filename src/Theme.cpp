@@ -156,6 +156,11 @@ Theme::Theme(QObject *parent)
         }
         rebuildDerivedColors();
     }
+
+    // First run: the config file does not exist yet, so record the effective
+    // (default) theme mode to create it and make the choice restorable later.
+    if (!settings.contains(QStringLiteral("themeMode")))
+        QSettings().setValue(QStringLiteral("themeMode"), QStringLiteral("system"));
 }
 
 QString Theme::themeMode() const

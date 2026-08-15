@@ -31,7 +31,11 @@ public:
     QStringList languageCodes() const { return m_codes; }
     QStringList languageNames() const { return m_names; }
 
+    // Persists the choice so it survives restarts (settings dialog).
     Q_INVOKABLE void setLanguage(const QString &code);
+    // Same but without persisting, used by the --lang / --switch CLI debug
+    // flags so a forced test language is not recorded as the user's choice.
+    void setLanguage(const QString &code, bool save);
     // QML bindings must pass Tr.language as the second argument so they
     // re-evaluate when the language changes at runtime.
     Q_INVOKABLE QString t(const QString &key, const QString &language) const;
