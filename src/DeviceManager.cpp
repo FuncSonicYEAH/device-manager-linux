@@ -14,6 +14,92 @@
 #include <utility>
 
 // ---------------------------------------------------------------------------
+// PCI/USB ID databases (pci.ids / usb.ids) for specific model names
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// Loaded lazily from the system hwdata files (/usr/share/hwdata,
+// /usr/share/misc, ...). Maps "vvvv" -> vendor name and "vvvv:dddd" -> model
+// name; keys are lower-case hex without the "0x" prefix.
+struct IdsDb
+{
+    QHash<QString, QString> pciVendors;
+    QHash<QString, QString> pciDevices;
+    QHash<QString, QString> usbVendors;
+    QHash<QString, QString> usbDevices;
+
+    static QString normalize(QString s)
+    {
+        s.remove(QLatin1String("0x"));
+        return s.toLower();
+    }
+
+    static void parseFile(const QString &path, QHash<QString, QString> *vendors,
+                          QHash<QString, QString> *devices)
+    {
+        QFile f(path);
+        if (!f.open(QIODevice::ReadOnly))
+            return;
+        QString vendor;
+        const QRegularExpression vendorRe(QStringLiteral("^([0-9a-fA-F]{4})  "));
+        const QRegularExpression deviceRe(QStringLiteral("^\\t([0-9a-fA-F]{4})  "));
+        while (!f.atEnd()) {
+            const QString line = QString::fromUtf8(f.readLine());
+            if (line.isEmpty() || line.startsWith(QLatin1Char('#')))
+                continue;
+            QRegularExpressionMatch m = vendorRe.match(line);
+            if (m.hasMatch()) {
+                vendor = m.captured(1);
+                vendors->insert(vendor, line.mid(6).trimmed());
+                continue;
+            }
+            // device (single tab); subsystem lines start with two tabs and
+            // class/subclass lines with a letter, so they are skipped here
+            if (!vendor.isEmpty()) {
+                m = deviceRe.match(line);
+                if (m.hasMatch())
+                    devices->insert(vendor + QLatin1Char(':') + m.captured(1),
+                                    line.mid(7).trimmed());
+            }
+        }
+    }
+
+    static const IdsDb &instance()
+    {
+        static const IdsDb db = [] {
+            IdsDb db;
+            const QStringList pciPaths = {
+                QStringLiteral("/usr/share/hwdata/pci.ids"),
+                QStringLiteral("/usr/share/misc/pci.ids"),
+                QStringLiteral("/usr/share/pci.ids"),
+            };
+            const QStringList usbPaths = {
+                QStringLiteral("/usr/share/hwdata/usb.ids"),
+                QStringLiteral("/usr/share/misc/usb.ids"),
+                QStringLiteral("/usr/share/usb.ids"),
+            };
+            for (const QString &p : pciPaths) {
+                if (QFile::exists(p)) {
+                    parseFile(p, &db.pciVendors, &db.pciDevices);
+                    break;
+                }
+            }
+            for (const QString &p : usbPaths) {
+                if (QFile::exists(p)) {
+                    parseFile(p, &db.usbVendors, &db.usbDevices);
+                    break;
+                }
+            }
+            return db;
+        }();
+        return db;
+    }
+};
+
+} // namespace
+
+// ---------------------------------------------------------------------------
 // Small lookup tables (vendor / driver / category display metadata)
 // ---------------------------------------------------------------------------
 
@@ -53,6 +139,35 @@ static const QHash<QString, QString> kUsbVendors = {
     { QStringLiteral("05ac"), QStringLiteral("Apple") },
     { QStringLiteral("1bcf"), QStringLiteral("Sunplus") },
     { QStringLiteral("346d"), QStringLiteral("USB") },
+};
+
+// eMMC/SD manufacturer IDs (the `manfid` sysfs attribute, hex without 0x)
+static const QHash<QString, QString> kMmcVendors = {
+    { QStringLiteral("000001"), QStringLiteral("Panasonic") },
+    { QStringLiteral("000002"), QStringLiteral("Toshiba") },
+    { QStringLiteral("000003"), QStringLiteral("SanDisk") },
+    { QStringLiteral("000008"), QStringLiteral("Silicon Power") },
+    { QStringLiteral("000011"), QStringLiteral("Toshiba") },
+    { QStringLiteral("000013"), QStringLiteral("Toshiba") },
+    { QStringLiteral("000015"), QStringLiteral("Samsung") },
+    { QStringLiteral("00001b"), QStringLiteral("Samsung") },
+    { QStringLiteral("000028"), QStringLiteral("Lexar") },
+    { QStringLiteral("000031"), QStringLiteral("SanDisk") },
+    { QStringLiteral("000033"), QStringLiteral("SanDisk") },
+    { QStringLiteral("000041"), QStringLiteral("SanDisk") },
+    { QStringLiteral("000045"), QStringLiteral("SanDisk") },
+    { QStringLiteral("000047"), QStringLiteral("SanDisk") },
+    { QStringLiteral("000070"), QStringLiteral("Phison") },
+    { QStringLiteral("000073"), QStringLiteral("SK Hynix") },
+    { QStringLiteral("000076"), QStringLiteral("SK Hynix") },
+    { QStringLiteral("000090"), QStringLiteral("Kingston") },
+    { QStringLiteral("0000cd"), QStringLiteral("Silicon Motion") },
+    { QStringLiteral("0000e0"), QStringLiteral("SkyHigh") },
+    { QStringLiteral("0000f8"), QStringLiteral("Samsung") },
+    { QStringLiteral("0000fc"), QStringLiteral("Micron") },
+    { QStringLiteral("0000fe"), QStringLiteral("SK Hynix") },
+    { QStringLiteral("000101"), QStringLiteral("Netac") },
+    { QStringLiteral("0001ad"), QStringLiteral("Samsung") },
 };
 
 static const QHash<QString, QString> kDriverNames = {
@@ -291,6 +406,51 @@ QString DeviceManager::vendorName(const QString &hexId)
     if (kUsbVendors.contains(lower))
         return kUsbVendors.value(lower);
     return hexId;
+}
+
+QString DeviceManager::pciVendorName(const QString &hexId)
+{
+    const QString v = IdsDb::instance().pciVendors.value(IdsDb::normalize(hexId));
+    return v.isEmpty() ? vendorName(hexId) : v;
+}
+
+QString DeviceManager::pciDeviceName(const QString &vendorId, const QString &deviceId)
+{
+    if (vendorId.isEmpty() || deviceId.isEmpty())
+        return QString();
+    const QString v = IdsDb::normalize(vendorId);
+    const QString d = IdsDb::normalize(deviceId);
+    if (v.size() != 4 || d.size() != 4)
+        return QString();
+    QString name = IdsDb::instance().pciDevices.value(v + QLatin1Char(':') + d);
+    if (name == QLatin1String("Unclassified device"))
+        name.clear();
+    return name;
+}
+
+QString DeviceManager::usbVendorName(const QString &hexId)
+{
+    const QString v = IdsDb::instance().usbVendors.value(IdsDb::normalize(hexId));
+    return v.isEmpty() ? vendorName(hexId) : v;
+}
+
+QString DeviceManager::usbDeviceName(const QString &vendorId, const QString &productId)
+{
+    if (vendorId.isEmpty() || productId.isEmpty())
+        return QString();
+    const QString v = IdsDb::normalize(vendorId);
+    const QString p = IdsDb::normalize(productId);
+    if (v.size() != 4 || p.size() != 4)
+        return QString();
+    QString name = IdsDb::instance().usbDevices.value(v + QLatin1Char(':') + p);
+    if (name == QLatin1String("Unclassified device"))
+        name.clear();
+    return name;
+}
+
+QString DeviceManager::mmcVendorName(const QString &manfid)
+{
+    return kMmcVendors.value(IdsDb::normalize(manfid));
 }
 
 QString DeviceManager::driverDisplayName(const QString &driver)
@@ -620,7 +780,8 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
     if (e.bus == QLatin1String("other") && anchor.contains(QStringLiteral("/serial8250")))
         e.bus = QStringLiteral("platform");
 
-    // vendor ----------------------------------------------------------------
+    // vendor & specific model -------------------------------------------------
+    QString modelName;
     if (e.vendor.isEmpty()) {
         // PCI function nodes have the "vendor" attribute; SCSI devices also
         // expose a "vendor" file, so only trust it for real PCI BDF nodes.
@@ -630,11 +791,14 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
         const QString pciVendor = readFile(anchor + QStringLiteral("/vendor"));
         const QString usbVendor = readFile(anchor + QStringLiteral("/idVendor"));
         const QString usbMfr = readFile(anchor + QStringLiteral("/manufacturer"));
-        if (bdfRe.match(baseName).hasMatch())
-            e.vendor = vendorName(pciVendor);
-        else if (!usbVendor.isEmpty())
-            e.vendor = vendorName(usbVendor);
-        else if (!usbMfr.isEmpty() && usbMfr != QLatin1String("unknown"))
+        if (bdfRe.match(baseName).hasMatch()) {
+            // prefer the full vendor name from pci.ids, then the built-in table
+            e.vendor = pciVendorName(pciVendor);
+            modelName = pciDeviceName(pciVendor, readFile(anchor + QStringLiteral("/device")));
+        } else if (!usbVendor.isEmpty()) {
+            e.vendor = usbVendorName(usbVendor);
+            modelName = usbDeviceName(usbVendor, readFile(anchor + QStringLiteral("/idProduct")));
+        } else if (!usbMfr.isEmpty() && usbMfr != QLatin1String("unknown"))
             e.vendor = usbMfr;
         else
             e.vendor = findUp(anchor, { QStringLiteral("manufacturer") });
@@ -673,13 +837,17 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
     if (e.category == QLatin1String("network")) {
         if (e.entryName == QLatin1String("lo"))
             e.name = Translator::translate(QStringLiteral("loopbackAdapter"));
+        else if (!modelName.isEmpty())
+            e.name = modelName + QStringLiteral(" (") + e.entryName + QLatin1Char(')');
         else if (!driverName.isEmpty())
             e.name = driverName + QStringLiteral(" (") + e.entryName + QLatin1Char(')');
         else
             e.name = e.entryName;
     } else if (e.category == QLatin1String("display") || e.category == QLatin1String("sound")
                || e.category == QLatin1String("clock")) {
-        if (!driverName.isEmpty())
+        if (!modelName.isEmpty())
+            e.name = modelName;
+        else if (!driverName.isEmpty())
             e.name = driverName;
     } else if (e.category == QLatin1String("disk")) {
         const QString model = findUp(anchor, { QStringLiteral("model"), QStringLiteral("product") });
@@ -697,11 +865,20 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
         }
     } else if (e.category == QLatin1String("usb-ctrl")) {
         if (e.driver == QLatin1String("hub")) {
-            if (e.entryName.startsWith(QStringLiteral("usb")))
-                e.name = findUp(anchor, { QStringLiteral("product"), QStringLiteral("name") });
-            else
+            if (e.entryName.startsWith(QStringLiteral("usb"))) {
+                // root hubs: keep the sysfs product (e.g. "xHCI Host Controller"),
+                // fall back to the usb.ids name (e.g. "2.0 root hub")
+                const QString product = findUp(anchor, { QStringLiteral("product"), QStringLiteral("name") });
+                e.name = product.isEmpty() ? modelName : product;
+            } else if (!modelName.isEmpty() && modelName != QLatin1String("Hub")
+                       && modelName != QLatin1String("hub")) {
+                e.name = modelName;
+            } else {
                 e.name = Translator::translate(QStringLiteral("usbHub")) + QStringLiteral(" (")
                     + e.entryName + QLatin1Char(')');
+            }
+        } else if (!modelName.isEmpty()) {
+            e.name = modelName;
         } else {
             const QString product = findUp(anchor, { QStringLiteral("product"), QStringLiteral("name") });
             if (!product.isEmpty())
@@ -723,8 +900,10 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
         if (e.entryName == QLatin1String("id"))
             e.name = Translator::translate(QStringLiteral("systemFirmware"));
     } else if (e.category == QLatin1String("system")) {
-        // PCI devices: try the driver table, then the PCI class table
-        if (!driverName.isEmpty()) {
+        // PCI devices: try the specific model, then the driver table, then the PCI class table
+        if (!modelName.isEmpty()) {
+            e.name = modelName;
+        } else if (!driverName.isEmpty()) {
             e.name = driverName;
         } else {
             const QString cls = readFile(anchor + QStringLiteral("/class"));
@@ -734,13 +913,24 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
                     e.name = e.vendor + QLatin1Char(' ') + Translator::translate(cn);
             }
         }
+    } else if (e.category == QLatin1String("storage-ctrl") && e.bus == QLatin1String("mmc")) {
+        // eMMC/SD devices expose a model `name` plus a manufacturer id
+        const QString n = readFile(anchor + QStringLiteral("/name"));
+        if (!n.isEmpty()) {
+            const QString mv = mmcVendorName(readFile(anchor + QStringLiteral("/manfid")));
+            e.name = mv.isEmpty() ? n : mv + QLatin1Char(' ') + n;
+        }
     } else if (e.category == QLatin1String("battery")) {
         // explicitName already set in the class scan
     } else if (e.category == QLatin1String("input") || e.category == QLatin1String("camera")) {
         if (e.name.isEmpty() || e.name == e.entryName) {
-            const QString product = findUp(anchor, { QStringLiteral("product"), QStringLiteral("name") });
-            if (!product.isEmpty())
-                e.name = product;
+            if (!modelName.isEmpty())
+                e.name = modelName;
+            else {
+                const QString product = findUp(anchor, { QStringLiteral("product"), QStringLiteral("name") });
+                if (!product.isEmpty())
+                    e.name = product;
+            }
         }
     }
 
@@ -758,6 +948,7 @@ void DeviceManager::finalizeDevice(DeviceEntry &e)
     addProp(tr(QStringLiteral("deviceType")), categoryName(e.category));
     addProp(tr(QStringLiteral("status")), statusName(e.status));
     addProp(tr(QStringLiteral("manufacturer")), e.vendor);
+    addProp(tr(QStringLiteral("model")), modelName);
     addProp(tr(QStringLiteral("bus")), busName(e.bus));
     addProp(tr(QStringLiteral("driver")), e.driver.isEmpty() ? QStringLiteral("—") : e.driver);
     addProp(tr(QStringLiteral("hardwareId")), e.modalias.isEmpty() ? QStringLiteral("—") : e.modalias);

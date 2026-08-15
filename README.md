@@ -86,8 +86,10 @@ QT_QPA_PLATFORM=xcb ./build/device-manager    # force X11
 
 ## Notes
 
-- Device information comes from `/sys/class`, `/sys/bus` and `/proc/cpuinfo`; vendor/driver
-  names use small built-in lookup tables, unknown IDs are shown raw (e.g. `0x10ec`).
+- Device information comes from `/sys/class`, `/sys/bus` and `/proc/cpuinfo`. Specific model
+  names for PCI/USB devices are looked up in the system's `pci.ids` / `usb.ids` databases
+  (`/usr/share/hwdata`, `/usr/share/misc`, ...); without them, small built-in vendor/driver
+  tables are used and unknown IDs are shown raw (e.g. `0x10ec`).
 - Status detection: `power/runtime_status` (suspended), network `carrier` (unplugged),
   `rfkill` (disabled).
 - The theme follows the system color scheme (`QStyleHints::colorScheme`); toggling

@@ -50,6 +50,12 @@ private:
     static QString canonicalPath(const QString &path);
     static QString findUp(const QString &startPath, const QStringList &names);
     static QString vendorName(const QString &hexId);
+    // specific model / vendor names from the system pci.ids / usb.ids databases
+    static QString pciVendorName(const QString &hexId);
+    static QString pciDeviceName(const QString &vendorId, const QString &deviceId);
+    static QString usbVendorName(const QString &hexId);
+    static QString usbDeviceName(const QString &vendorId, const QString &productId);
+    static QString mmcVendorName(const QString &manfid);
     static QString driverDisplayName(const QString &driver);
     static QString driverIcon(const QString &driver);
     static QString categoryName(const QString &key);
