@@ -12,6 +12,7 @@ Item {
     signal propertiesRequested()
     signal refreshRequested()
     signal smartRequested()
+    signal graphicsRequested()
 
     ColumnLayout {
         anchors.fill: parent
@@ -137,6 +138,14 @@ Item {
                         implicitWidth: 120
                         implicitHeight: 36
                         onClicked: root.smartRequested()
+                    }
+                    RippleButton {
+                        visible: root.device !== null && root.device.category === "display"
+                        buttonText: Tr.t("graphicsSupportTitle", Tr.language)
+                        buttonRadius: Appearance.rounding.small
+                        implicitWidth: 130
+                        implicitHeight: 36
+                        onClicked: root.graphicsRequested()
                     }
                     Item { Layout.fillWidth: true }
                     RippleButton {

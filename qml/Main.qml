@@ -93,6 +93,11 @@ ApplicationWindow {
             smartDialog.open()
     }
 
+    function openGraphics() {
+        if (root.selectedDevice !== null)
+            graphicsDialog.open()
+    }
+
     // Build the right-click menu entries for a device.
     function buildMenuItems(dev) {
         var items = []
@@ -101,6 +106,9 @@ ApplicationWindow {
         if (dev.category === "disk")
             items.push({ icon: "monitor_heart", text: Tr.t("smartHealthCheck", Tr.language),
                          enabled: true, action: "smart" })
+        if (dev.category === "display")
+            items.push({ icon: "view_in_ar", text: Tr.t("graphicsSupportTitle", Tr.language),
+                         enabled: true, action: "graphics" })
         items.push({ icon: "", text: "", enabled: false, action: "separator" })
         items.push({ icon: "pause_circle", text: Tr.t("suspendDevice", Tr.language),
                      enabled: DeviceActions.supportsAction(dev, "suspend"), action: "suspend" })
@@ -128,6 +136,8 @@ ApplicationWindow {
         var action = items[index].action
         if (action === "smart") {
             root.openSmart()
+        } else if (action === "graphics") {
+            root.openGraphics()
         } else if (action === "suspend" || action === "enable" || action === "start") {
             root.actionDevice = root.selectedDevice
             actionWarningDialog.action = action
@@ -224,6 +234,19 @@ ApplicationWindow {
                 anchors.right: parent.right
                 spacing: 6
 
+                RippleButton {
+                    buttonRadius: Appearance.rounding.full
+                    implicitWidth: 35
+                    implicitHeight: 35
+                    onClicked: aboutDialog.open()
+                    contentItem: MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "info"
+                        iconSize: 20
+                        color: Appearance.colors.colOnLayer0
+                    }
+                    StyledToolTip { text: Tr.t("aboutApp", Tr.language) }
+                }
                 RippleButton {
                     id: settingsButton
                     buttonRadius: Appearance.rounding.full
@@ -439,6 +462,7 @@ ApplicationWindow {
                     onPropertiesRequested: root.openProperties()
                     onRefreshRequested: root.refresh()
                     onSmartRequested: root.openSmart()
+                    onGraphicsRequested: root.openGraphics()
                 }
             }
         }
@@ -497,6 +521,12 @@ ApplicationWindow {
         device: root.actionDevice
         onActionCompleted: (deviceId) => root.refresh()
     }
+
+    // ---- graphics support (OpenGL / Vulkan) dialog --------------------------
+    GraphicsDialog { id: graphicsDialog }
+
+    // ---- about dialog -------------------------------------------------------
+    AboutDialog { id: aboutDialog }
 
     // ---- settings dialog ---------------------------------------------------
     SettingsDialog { id: settingsDialog }

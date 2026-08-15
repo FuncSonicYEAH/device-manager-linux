@@ -14,6 +14,8 @@
 #include "DeviceManager.h"
 #include "DeviceActions.h"
 #include "SmartReader.h"
+#include "GraphicsProbe.h"
+#include "AboutInfo.h"
 #include "Translator.h"
 
 // Bundle the Material Symbols Rounded variable font so the icon widget works
@@ -57,6 +59,33 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    if (argc > 1 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--gpuinfo")) {
+        GraphicsProbe probe;
+        const QVariantList gpus = probe.gpus();
+        printf("GPUs: %d\n", int(gpus.size()));
+        for (const QVariant &gv : gpus) {
+            const QVariantMap g = gv.toMap();
+            printf("  %-32s | %-12s | %-12s | GL:%-3s | %-22s | VK:%-3s | %s\n",
+                   qPrintable(g.value(QStringLiteral("name")).toString()),
+                   qPrintable(g.value(QStringLiteral("vendor")).toString()),
+                   qPrintable(g.value(QStringLiteral("driver")).toString()),
+                   g.value(QStringLiteral("glSupported")).toBool() ? "yes" : "no",
+                   qPrintable(g.value(QStringLiteral("glNote")).toString()),
+                   g.value(QStringLiteral("vkSupported")).toBool() ? "yes" : "no",
+                   qPrintable(g.value(QStringLiteral("vkNote")).toString()));
+        }
+        printf("OpenGL: supported=%s providers=[%s] renderer='%s' version='%s'\n",
+               probe.openGLSupported() ? "yes" : "no",
+               qPrintable(probe.openGLProviders().join(QStringLiteral(", "))),
+               qPrintable(probe.openGLRenderer()),
+               qPrintable(probe.openGLVersion()));
+        printf("Vulkan: supported=%s drivers=[%s] apiVersion='%s'\n",
+               probe.vulkanSupported() ? "yes" : "no",
+               qPrintable(probe.vulkanDrivers().join(QStringLiteral(", "))),
+               qPrintable(probe.vulkanApiVersion()));
+        return 0;
+    }
+
     if (argc > 1 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dump")) {
         DeviceManager dm;
         const QVariantList groups = dm.typeGroups();
@@ -91,6 +120,8 @@ int main(int argc, char *argv[])
     DeviceManager deviceManager;
     SmartReader smartReader;
     DeviceActions deviceActions;
+    GraphicsProbe graphicsProbe;
+    AboutInfo aboutInfo;
     // re-enumerate so the device groups are rebuilt in the new language
     bool noRefresh = false;
     for (int i = 1; i < argc; ++i)
@@ -114,6 +145,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceManager"), &deviceManager);
     engine.rootContext()->setContextProperty(QStringLiteral("Smart"), &smartReader);
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceActions"), &deviceActions);
+    engine.rootContext()->setContextProperty(QStringLiteral("Graphics"), &graphicsProbe);
+    engine.rootContext()->setContextProperty(QStringLiteral("AboutInfo"), &aboutInfo);
     engine.rootContext()->setContextProperty(QStringLiteral("Tr"), Translator::instance());
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
