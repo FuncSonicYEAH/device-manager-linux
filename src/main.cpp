@@ -15,6 +15,7 @@
 #include "DeviceActions.h"
 #include "SmartReader.h"
 #include "GraphicsProbe.h"
+#include "TemperatureProbe.h"
 #include "AboutInfo.h"
 #include "Translator.h"
 
@@ -121,6 +122,7 @@ int main(int argc, char *argv[])
     SmartReader smartReader;
     DeviceActions deviceActions;
     GraphicsProbe graphicsProbe;
+    TemperatureProbe temperatureProbe;
     AboutInfo aboutInfo;
     // re-enumerate so the device groups are rebuilt in the new language
     bool noRefresh = false;
@@ -146,6 +148,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("Smart"), &smartReader);
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceActions"), &deviceActions);
     engine.rootContext()->setContextProperty(QStringLiteral("Graphics"), &graphicsProbe);
+    engine.rootContext()->setContextProperty(QStringLiteral("Temperature"), &temperatureProbe);
     engine.rootContext()->setContextProperty(QStringLiteral("AboutInfo"), &aboutInfo);
     engine.rootContext()->setContextProperty(QStringLiteral("Tr"), Translator::instance());
 

@@ -98,6 +98,11 @@ ApplicationWindow {
             graphicsDialog.open()
     }
 
+    function openTemperature() {
+        if (root.selectedDevice !== null)
+            temperatureDialog.open()
+    }
+
     // Build the right-click menu entries for a device.
     function buildMenuItems(dev) {
         var items = []
@@ -109,6 +114,9 @@ ApplicationWindow {
         if (dev.category === "display")
             items.push({ icon: "view_in_ar", text: Tr.t("graphicsSupportTitle", Tr.language),
                          enabled: true, action: "graphics" })
+        if (Temperature.supportsTemperature(dev))
+            items.push({ icon: "thermostat", text: Tr.t("temperatureCurveTitle", Tr.language),
+                         enabled: true, action: "temperature" })
         items.push({ icon: "", text: "", enabled: false, action: "separator" })
         items.push({ icon: "pause_circle", text: Tr.t("suspendDevice", Tr.language),
                      enabled: DeviceActions.supportsAction(dev, "suspend"), action: "suspend" })
@@ -138,6 +146,8 @@ ApplicationWindow {
             root.openSmart()
         } else if (action === "graphics") {
             root.openGraphics()
+        } else if (action === "temperature") {
+            root.openTemperature()
         } else if (action === "suspend" || action === "enable" || action === "start") {
             root.actionDevice = root.selectedDevice
             actionWarningDialog.action = action
@@ -524,6 +534,12 @@ ApplicationWindow {
 
     // ---- graphics support (OpenGL / Vulkan) dialog --------------------------
     GraphicsDialog { id: graphicsDialog }
+
+    // ---- temperature curve dialog --------------------------------------------
+    TemperatureDialog {
+        id: temperatureDialog
+        device: root.selectedDevice
+    }
 
     // ---- about dialog -------------------------------------------------------
     AboutDialog { id: aboutDialog }

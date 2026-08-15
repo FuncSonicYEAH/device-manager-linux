@@ -22,6 +22,7 @@ sources = files(
   'src/DeviceActions.cpp',
   'src/SmartReader.cpp',
   'src/GraphicsProbe.cpp',
+  'src/TemperatureProbe.cpp',
   'src/AboutInfo.cpp',
   'src/Translator.cpp',
 )
@@ -34,6 +35,7 @@ moc = qt6.preprocess(
     'src/DeviceActions.h',
     'src/SmartReader.h',
     'src/GraphicsProbe.h',
+    'src/TemperatureProbe.h',
     'src/AboutInfo.h',
     'src/Translator.h',
   ),

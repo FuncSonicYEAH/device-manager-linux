@@ -225,7 +225,16 @@
     "cirrusGraphics": "Cirrus Logic 显卡",
     "mgaGraphics": "Matrox 显卡",
     "simpleFramebuffer": "简单帧缓冲",
-    "broadcomGraphics": "Broadcom 显卡"
+    "broadcomGraphics": "Broadcom 显卡",
+    "temperatureCurveTitle": "温度曲线",
+    "temperatureCurveSubtitle": "实时监测设备温度",
+    "recording": "记录中",
+    "timeWindow": "最近 %1 秒",
+    "startMonitoring": "开始记录",
+    "stopMonitoring": "停止记录",
+    "clear": "清除",
+    "waitingData": "等待采样数据…",
+    "noTemperatureSource": "未找到该设备的温度传感器"
   },
   "en": {
     "appTitle": "Device Manager",
@@ -453,7 +462,16 @@
     "cirrusGraphics": "Cirrus Logic graphics",
     "mgaGraphics": "Matrox graphics",
     "simpleFramebuffer": "Simple framebuffer",
-    "broadcomGraphics": "Broadcom graphics"
+    "broadcomGraphics": "Broadcom graphics",
+    "temperatureCurveTitle": "Temperature curve",
+    "temperatureCurveSubtitle": "Live device temperature monitoring",
+    "recording": "Recording",
+    "timeWindow": "Last %1 s",
+    "startMonitoring": "Start recording",
+    "stopMonitoring": "Stop recording",
+    "clear": "Clear",
+    "waitingData": "Waiting for samples…",
+    "noTemperatureSource": "No temperature sensors found for this device"
   },
   "zh_TW": {
     "appTitle": "裝置管理員",
@@ -681,7 +699,16 @@
     "cirrusGraphics": "Cirrus Logic 顯示卡",
     "mgaGraphics": "Matrox 顯示卡",
     "simpleFramebuffer": "簡單影格緩衝",
-    "broadcomGraphics": "Broadcom 顯示卡"
+    "broadcomGraphics": "Broadcom 顯示卡",
+    "temperatureCurveTitle": "溫度曲線",
+    "temperatureCurveSubtitle": "即時監測裝置溫度",
+    "recording": "記錄中",
+    "timeWindow": "最近 %1 秒",
+    "startMonitoring": "開始記錄",
+    "stopMonitoring": "停止記錄",
+    "clear": "清除",
+    "waitingData": "等待取樣資料…",
+    "noTemperatureSource": "找不到此裝置的溫度感應器"
   },
   "ja": {
     "appTitle": "デバイスマネージャー",
@@ -909,7 +936,16 @@
     "cirrusGraphics": "Cirrus Logic グラフィックス",
     "mgaGraphics": "Matrox グラフィックス",
     "simpleFramebuffer": "シンプルフレームバッファー",
-    "broadcomGraphics": "Broadcom グラフィックス"
+    "broadcomGraphics": "Broadcom グラフィックス",
+    "temperatureCurveTitle": "温度曲線",
+    "temperatureCurveSubtitle": "デバイス温度のリアルタイム監視",
+    "recording": "記録中",
+    "timeWindow": "過去 %1 秒",
+    "startMonitoring": "記録開始",
+    "stopMonitoring": "記録停止",
+    "clear": "クリア",
+    "waitingData": "サンプル待機中…",
+    "noTemperatureSource": "このデバイスの温度センサーが見つかりません"
   },
   "ru": {
     "appTitle": "Диспетчер устройств",
@@ -1137,6 +1173,15 @@
     "cirrusGraphics": "Графика Cirrus Logic",
     "mgaGraphics": "Графика Matrox",
     "simpleFramebuffer": "Простой кадровый буфер",
-    "broadcomGraphics": "Графика Broadcom"
+    "broadcomGraphics": "Графика Broadcom",
+    "temperatureCurveTitle": "Кривая температуры",
+    "temperatureCurveSubtitle": "Мониторинг температуры устройства в реальном времени",
+    "recording": "Запись",
+    "timeWindow": "Последние %1 с",
+    "startMonitoring": "Начать запись",
+    "stopMonitoring": "Остановить запись",
+    "clear": "Очистить",
+    "waitingData": "Ожидание данных…",
+    "noTemperatureSource": "Для этого устройства датчики температуры не найдены"
   }
 }
