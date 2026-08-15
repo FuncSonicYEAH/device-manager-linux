@@ -11,6 +11,7 @@ Item {
 
     signal propertiesRequested()
     signal refreshRequested()
+    signal smartRequested()
 
     ColumnLayout {
         anchors.fill: parent
@@ -128,6 +129,14 @@ Item {
                         implicitWidth: 130
                         implicitHeight: 36
                         onClicked: root.refreshRequested()
+                    }
+                    RippleButton {
+                        visible: root.device !== null && root.device.category === "disk"
+                        buttonText: Tr.t("smartHealthCheck", Tr.language)
+                        buttonRadius: Appearance.rounding.small
+                        implicitWidth: 120
+                        implicitHeight: 36
+                        onClicked: root.smartRequested()
                     }
                     Item { Layout.fillWidth: true }
                     RippleButton {

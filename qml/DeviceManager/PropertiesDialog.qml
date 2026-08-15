@@ -5,7 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Components
 
-Dialog {
+AnimatedDialog {
     id: root
 
     property var device: null
@@ -13,23 +13,8 @@ Dialog {
 
     signal refreshRequested()
 
-    modal: true
-    dim: true
-    anchors.centerIn: parent
     width: Math.min(560, parent.width * 0.85)
     height: Math.min(460, parent.height * 0.85)
-    padding: 0
-
-    Overlay.modal: Rectangle {
-        color: Appearance.colors.colScrim
-    }
-
-    background: Rectangle {
-        radius: Appearance.rounding.windowRounding
-        color: Appearance.m3colors.m3surfaceContainerLow
-        border.color: Appearance.colors.colOutlineVariant
-        border.width: 1
-    }
 
     contentItem: ColumnLayout {
         spacing: 0

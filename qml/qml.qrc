@@ -4,12 +4,16 @@
         <file>Main.qml</file>
         <file>fonts/MaterialSymbolsRounded.ttf</file>
         <file>i18n/translations.json</file>
+        <file>DeviceManager/AnimatedDialog.qml</file>
         <file>DeviceManager/DeviceList.qml</file>
         <file>DeviceManager/DetailsPane.qml</file>
         <file>DeviceManager/PropsList.qml</file>
         <file>DeviceManager/PropertiesDialog.qml</file>
         <file>DeviceManager/SettingsDialog.qml</file>
         <file>DeviceManager/StatusBadge.qml</file>
+        <file>DeviceManager/SmartDialog.qml</file>
+        <file>DeviceManager/ActionWarningDialog.qml</file>
+        <file>DeviceManager/ContextMenu.qml</file>
         <file>Components/qmldir</file>
         <file>Components/StyledText.qml</file>
         <file>Components/StyledRectangle.qml</file>

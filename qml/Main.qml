@@ -27,6 +27,8 @@ ApplicationWindow {
     property string selectedDeviceId: ""
     property var selectedDevice: null
     property string lastScanTime: ""
+    // device the pending/executing power action refers to
+    property var actionDevice: null
 
     property var groups: viewMode === "type"
         ? DeviceManager.typeGroups
@@ -84,6 +86,55 @@ ApplicationWindow {
     function openProperties() {
         if (root.selectedDevice !== null)
             propertiesDialog.open()
+    }
+
+    function openSmart() {
+        if (root.selectedDevice !== null)
+            smartDialog.open()
+    }
+
+    // Build the right-click menu entries for a device.
+    function buildMenuItems(dev) {
+        var items = []
+        items.push({ icon: "info", text: Tr.t("properties", Tr.language),
+                     enabled: true, action: "properties" })
+        if (dev.category === "disk")
+            items.push({ icon: "monitor_heart", text: Tr.t("smartHealthCheck", Tr.language),
+                         enabled: true, action: "smart" })
+        items.push({ icon: "", text: "", enabled: false, action: "separator" })
+        items.push({ icon: "pause_circle", text: Tr.t("suspendDevice", Tr.language),
+                     enabled: DeviceActions.supportsAction(dev, "suspend"), action: "suspend" })
+        items.push({ icon: "play_circle", text: Tr.t("enableDevice", Tr.language),
+                     enabled: DeviceActions.supportsAction(dev, "enable"), action: "enable" })
+        items.push({ icon: "power_settings_new", text: Tr.t("startDevice", Tr.language),
+                     enabled: DeviceActions.supportsAction(dev, "start"), action: "start" })
+        return items
+    }
+
+    function showContextMenu(dev, x, y) {
+        root.selectDevice(dev)
+        contextMenu.menuItems = root.buildMenuItems(dev)
+        var mx = Math.max(8, Math.min(x, root.width - contextMenu.width - 8))
+        var my = Math.max(8, Math.min(y, root.height - contextMenu.height - 8))
+        contextMenu.x = mx
+        contextMenu.y = my
+        contextMenu.open()
+    }
+
+    function onContextItem(index) {
+        var items = contextMenu.menuItems
+        if (index < 0 || index >= items.length)
+            return
+        var action = items[index].action
+        if (action === "smart") {
+            root.openSmart()
+        } else if (action === "suspend" || action === "enable" || action === "start") {
+            root.actionDevice = root.selectedDevice
+            actionWarningDialog.action = action
+            actionWarningDialog.open()
+        } else if (action === "properties") {
+            root.openProperties()
+        }
     }
 
     Component.onCompleted: {
@@ -328,10 +379,7 @@ ApplicationWindow {
                         expandedKeys: root.expandedKeys
                         selectedDeviceId: root.selectedDeviceId
                         onDeviceClicked: (dev) => root.selectDevice(dev)
-                        onDeviceAltClicked: (dev) => {
-                            root.selectDevice(dev)
-                            root.openProperties()
-                        }
+                        onDeviceContextRequested: (dev, x, y) => root.showContextMenu(dev, x, y)
                         onCategoryToggled: (key) => root.toggleCategory(key)
                         Keys.onUpPressed: deviceList.moveSelection(-1)
                         Keys.onDownPressed: deviceList.moveSelection(1)
@@ -390,6 +438,7 @@ ApplicationWindow {
                     device: root.selectedDevice
                     onPropertiesRequested: root.openProperties()
                     onRefreshRequested: root.refresh()
+                    onSmartRequested: root.openSmart()
                 }
             }
         }
@@ -423,11 +472,30 @@ ApplicationWindow {
         }
     }
 
+    // ---- context menu (right-click on a device) ----------------------------
+    ContextMenu {
+        id: contextMenu
+        onItemActivated: (index) => root.onContextItem(index)
+    }
+
     // ---- properties dialog ------------------------------------------------
     PropertiesDialog {
         id: propertiesDialog
         device: root.selectedDevice
         onRefreshRequested: root.refresh()
+    }
+
+    // ---- SMART health check dialog -----------------------------------------
+    SmartDialog {
+        id: smartDialog
+        device: root.selectedDevice
+    }
+
+    // ---- device action warning dialog --------------------------------------
+    ActionWarningDialog {
+        id: actionWarningDialog
+        device: root.actionDevice
+        onActionCompleted: (deviceId) => root.refresh()
     }
 
     // ---- settings dialog ---------------------------------------------------

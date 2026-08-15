@@ -12,6 +12,8 @@
 #include "ColorUtils.h"
 #include "Theme.h"
 #include "DeviceManager.h"
+#include "DeviceActions.h"
+#include "SmartReader.h"
 #include "Translator.h"
 
 // Bundle the Material Symbols Rounded variable font so the icon widget works
@@ -87,6 +89,8 @@ int main(int argc, char *argv[])
     ColorUtils colorUtils;
     Theme theme;
     DeviceManager deviceManager;
+    SmartReader smartReader;
+    DeviceActions deviceActions;
     // re-enumerate so the device groups are rebuilt in the new language
     bool noRefresh = false;
     for (int i = 1; i < argc; ++i)
@@ -108,6 +112,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("ColorUtils"), &colorUtils);
     engine.rootContext()->setContextProperty(QStringLiteral("Appearance"), &theme);
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceManager"), &deviceManager);
+    engine.rootContext()->setContextProperty(QStringLiteral("Smart"), &smartReader);
+    engine.rootContext()->setContextProperty(QStringLiteral("DeviceActions"), &deviceActions);
     engine.rootContext()->setContextProperty(QStringLiteral("Tr"), Translator::instance());
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));

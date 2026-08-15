@@ -36,6 +36,8 @@ struct DeviceEntry
         m.insert(QStringLiteral("modalias"), modalias);
         m.insert(QStringLiteral("status"), status);
         m.insert(QStringLiteral("sysfsPath"), sysfsPath);
+        m.insert(QStringLiteral("entryName"), entryName);
+        m.insert(QStringLiteral("entryPath"), entryPath);
         m.insert(QStringLiteral("props"), props);
         return m;
     }

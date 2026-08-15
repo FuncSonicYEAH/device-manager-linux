@@ -16,6 +16,8 @@ sources = files(
   'src/ColorUtils.cpp',
   'src/Theme.cpp',
   'src/DeviceManager.cpp',
+  'src/DeviceActions.cpp',
+  'src/SmartReader.cpp',
   'src/Translator.cpp',
 )
 
@@ -24,6 +26,8 @@ moc = qt6.preprocess(
     'src/ColorUtils.h',
     'src/Theme.h',
     'src/DeviceManager.h',
+    'src/DeviceActions.h',
+    'src/SmartReader.h',
     'src/Translator.h',
   ),
 )

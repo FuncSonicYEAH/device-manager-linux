@@ -14,7 +14,9 @@ Item {
     property string selectedDeviceId: ""
 
     signal deviceClicked(var device)
-    signal deviceAltClicked(var device)
+    // right-click: coordinates are relative to the window so a context menu
+    // can be positioned at the pointer
+    signal deviceContextRequested(var device, real x, real y)
     signal categoryToggled(string key)
 
     property var rows: []
@@ -175,7 +177,10 @@ Item {
             colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
             colBackgroundToggledActive: Appearance.colors.colSecondaryContainerActive
             onClicked: root.deviceClicked(rowData.dev)
-            altAction: (event) => root.deviceAltClicked(rowData.dev)
+            altAction: (event) => {
+                var pos = devRow.mapToItem(null, event.x, event.y)
+                root.deviceContextRequested(rowData.dev, pos.x, pos.y)
+            }
 
             contentItem: RowLayout {
                 anchors.left: parent.left
