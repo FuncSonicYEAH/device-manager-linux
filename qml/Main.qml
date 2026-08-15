@@ -473,6 +473,7 @@ ApplicationWindow {
                     onRefreshRequested: root.refresh()
                     onSmartRequested: root.openSmart()
                     onGraphicsRequested: root.openGraphics()
+                    onTemperatureRequested: root.openTemperature()
                 }
             }
         }

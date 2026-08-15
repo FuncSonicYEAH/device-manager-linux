@@ -13,6 +13,7 @@ Item {
     signal refreshRequested()
     signal smartRequested()
     signal graphicsRequested()
+    signal temperatureRequested()
 
     ColumnLayout {
         anchors.fill: parent
@@ -146,6 +147,14 @@ Item {
                         implicitWidth: 130
                         implicitHeight: 36
                         onClicked: root.graphicsRequested()
+                    }
+                    RippleButton {
+                        visible: root.device !== null && Temperature.supportsTemperature(root.device)
+                        buttonText: Tr.t("temperatureCurveTitle", Tr.language)
+                        buttonRadius: Appearance.rounding.small
+                        implicitWidth: 100
+                        implicitHeight: 36
+                        onClicked: root.temperatureRequested()
                     }
                     Item { Layout.fillWidth: true }
                     RippleButton {
