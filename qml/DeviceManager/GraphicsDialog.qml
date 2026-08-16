@@ -183,7 +183,7 @@ AnimatedDialog {
                             : Tr.t("graphicsToolsHint", Tr.language)
                         elide: Text.ElideRight
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colOnLayer1Inactive
+                        color: Appearance.colors.colOnLayer1
                     }
                 }
             }
@@ -245,7 +245,7 @@ AnimatedDialog {
                             : Tr.t("graphicsToolsHint", Tr.language)
                         elide: Text.ElideRight
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colOnLayer1Inactive
+                        color: Appearance.colors.colOnLayer1
                     }
                 }
             }
@@ -273,7 +273,7 @@ AnimatedDialog {
             StyledText {
                 text: Tr.t("graphicsDetecting", Tr.language)
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
         }
 
@@ -295,7 +295,7 @@ AnimatedDialog {
             StyledText {
                 text: Graphics.gpus.length + " · " + Tr.t("openGL", Tr.language) + " / " + Tr.t("vulkan", Tr.language)
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
         }
 
@@ -322,7 +322,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("noGpuFound", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 
@@ -382,7 +382,7 @@ AnimatedDialog {
                                         text: modelData.vendor + (modelData.driver !== "" ? " · " + modelData.driver : "")
                                         elide: Text.ElideRight
                                         font.pixelSize: Appearance.font.pixelSize.smallest
-                                        color: Appearance.colors.colOnLayer1Inactive
+                                        color: Appearance.colors.colOnLayer1
                                     }
                                     StyledText {
                                         Layout.fillWidth: true

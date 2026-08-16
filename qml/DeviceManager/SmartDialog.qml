@@ -346,7 +346,7 @@ AnimatedDialog {
                                                 StyledText {
                                                     text: Tr.t(modelData.key, Tr.language)
                                                     font.pixelSize: Appearance.font.pixelSize.smallest
-                                                    color: Appearance.colors.colOnLayer1Inactive
+                                                    color: Appearance.colors.colOnLayer1
                                                 }
                                             }
                                             StyledText {
@@ -395,7 +395,7 @@ AnimatedDialog {
                                             Layout.preferredWidth: modelData.fill ? -1 : modelData.width
                                             font.pixelSize: Appearance.font.pixelSize.smallest
                                             font.weight: Font.Medium
-                                            color: Appearance.colors.colOnLayer1Inactive
+                                            color: Appearance.colors.colOnLayer1
                                         }
                                     }
                                 }
@@ -419,7 +419,7 @@ AnimatedDialog {
                                             text: modelData.id > 0 ? modelData.id : "—"
                                             Layout.preferredWidth: 40
                                             font.pixelSize: Appearance.font.pixelSize.smallest
-                                            color: Appearance.colors.colOnLayer1Inactive
+                                            color: Appearance.colors.colOnLayer1
                                         }
                                         StyledText {
                                             text: modelData.name

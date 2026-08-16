@@ -178,7 +178,7 @@ AnimatedDialog {
                 visible: root.history.length > 0
                 text: Tr.t("timeWindow", Tr.language).replace("%1", root.history.length - 1)
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
         }
 
@@ -206,7 +206,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("noTemperatureSource", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 
@@ -247,7 +247,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("waitingData", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 
@@ -313,15 +313,15 @@ AnimatedDialog {
                     ctx.textBaseline = "middle"
                     for (var gy = y0; gy <= vmax; gy += yStep) {
                         var yy = yFor(gy)
-                        ctx.strokeStyle = Appearance.colors.colOutlineVariant
-                        ctx.globalAlpha = 0.45
+                        ctx.strokeStyle = Appearance.colors.colOnLayer1
+                        ctx.globalAlpha = 0.18
                         ctx.lineWidth = 1
                         ctx.beginPath()
                         ctx.moveTo(ml, yy)
                         ctx.lineTo(ml + pw, yy)
                         ctx.stroke()
                         ctx.globalAlpha = 1
-                        ctx.fillStyle = Appearance.colors.colOnLayer1Inactive
+                        ctx.fillStyle = Appearance.colors.colOnLayer1
                         ctx.fillText(gy, ml - 6, yy)
                     }
                     ctx.textAlign = "left"
@@ -335,14 +335,14 @@ AnimatedDialog {
                         ctx.textAlign = "center"
                         for (var tx = t0; tx <= 0; tx += tStep) {
                             var xi = ml + ((tx - tmin) / (0 - tmin)) * pw
-                            ctx.strokeStyle = Appearance.colors.colOutlineVariant
-                            ctx.globalAlpha = 0.25
+                            ctx.strokeStyle = Appearance.colors.colOnLayer1
+                            ctx.globalAlpha = 0.1
                             ctx.beginPath()
                             ctx.moveTo(xi, mt)
                             ctx.lineTo(xi, mt + ph)
                             ctx.stroke()
                             ctx.globalAlpha = 1
-                            ctx.fillStyle = Appearance.colors.colOnLayer1Inactive
+                            ctx.fillStyle = Appearance.colors.colOnLayer1
                             ctx.fillText(tx + "s", xi, mt + ph + 14)
                         }
                     }

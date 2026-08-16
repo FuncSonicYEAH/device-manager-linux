@@ -50,7 +50,7 @@ AnimatedDialog {
                 horizontalAlignment: Text.AlignHCenter
                 text: Tr.t("aboutVersion", Tr.language).arg(AboutInfo.appVersion)
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
 
             StyledText {
@@ -96,7 +96,7 @@ AnimatedDialog {
                 text: Tr.t("license", Tr.language) + " · GNU GPL v3"
                 elide: Text.ElideRight
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
             RippleButton {
                 buttonText: Tr.t("close", Tr.language)

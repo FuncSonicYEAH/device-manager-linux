@@ -275,7 +275,7 @@ AnimatedDialog {
                         Layout.fillWidth: true
                         text: Tr.t("rxRate", Tr.language)
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colOnLayer1Inactive
+                        color: Appearance.colors.colOnLayer1
                     }
                     StyledText {
                         Layout.fillWidth: true
@@ -300,7 +300,7 @@ AnimatedDialog {
                         Layout.fillWidth: true
                         text: Tr.t("txRate", Tr.language)
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colOnLayer1Inactive
+                        color: Appearance.colors.colOnLayer1
                     }
                     StyledText {
                         Layout.fillWidth: true
@@ -360,13 +360,13 @@ AnimatedDialog {
                       + Tr.t("txTotalFormat", Tr.language).replace("%1", root.formatTotal(root.lastPoint.txTotal))
                     : ""
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
             StyledText {
                 visible: root.history.length > 0
                 text: Tr.t("timeWindow", Tr.language).replace("%1", root.history.length - 1)
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
         }
 
@@ -394,7 +394,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("noNetworkInterface", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 
@@ -435,7 +435,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("waitingData", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 

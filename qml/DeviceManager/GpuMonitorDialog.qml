@@ -55,6 +55,20 @@ AnimatedDialog {
         return (mb / 1024).toFixed(2) + " GB"
     }
 
+    // compact label for the VRAM chart axis (kept short enough to fit the
+    // left margin: "8G", "2.5G", "512M")
+    function formatVramAxis(bytes) {
+        if (bytes < 0)
+            return "—"
+        var mb = bytes / (1024 * 1024)
+        if (mb < 1024)
+            return Math.round(mb) + "M"
+        var gb = mb / 1024
+        if (gb >= 100 || Math.abs(gb - Math.round(gb)) < 0.05)
+            return Math.round(gb) + "G"
+        return gb.toFixed(1) + "G"
+    }
+
     onOpened: {
         if (root.device !== null)
             Monitor.startGpu(root.device)
@@ -161,7 +175,7 @@ AnimatedDialog {
                         Layout.fillWidth: true
                         text: Tr.t("gpuUtilization", Tr.language)
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colOnLayer1Inactive
+                        color: Appearance.colors.colOnLayer1
                     }
                     StyledText {
                         Layout.fillWidth: true
@@ -186,7 +200,7 @@ AnimatedDialog {
                         Layout.fillWidth: true
                         text: Tr.t("vramUsage", Tr.language)
                         font.pixelSize: Appearance.font.pixelSize.smallest
-                        color: Appearance.colors.colOnLayer1Inactive
+                        color: Appearance.colors.colOnLayer1
                     }
                     StyledText {
                         Layout.fillWidth: true
@@ -244,7 +258,7 @@ AnimatedDialog {
                 visible: root.history.length > 0
                 text: Tr.t("timeWindow", Tr.language).replace("%1", root.history.length - 1)
                 font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colOnLayer1Inactive
+                color: Appearance.colors.colOnLayer1
             }
         }
 
@@ -272,7 +286,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("noGpuMonitorSource", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 
@@ -313,7 +327,7 @@ AnimatedDialog {
                     Layout.alignment: Qt.AlignHCenter
                     text: Tr.t("waitingData", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallie
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
 
@@ -328,7 +342,7 @@ AnimatedDialog {
                     text: Tr.t("gpuUtilization", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallest
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
                 LineChart {
                     Layout.fillWidth: true
@@ -353,7 +367,7 @@ AnimatedDialog {
                     text: Tr.t("vramUsage", Tr.language)
                     font.pixelSize: Appearance.font.pixelSize.smallest
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
                 LineChart {
                     Layout.fillWidth: true
@@ -362,7 +376,7 @@ AnimatedDialog {
                     timeCount: Monitor.gpuHistory.length
                     fixedMax: root.vramTotalNow >= 0 ? root.vramTotalNow : Number.NaN
                     unit: ""
-                    formatValue: function(v) { return root.formatVram(v) }
+                    formatValue: function(v) { return root.formatVramAxis(v) }
                 }
             }
         }

@@ -162,7 +162,7 @@ AnimatedDialog {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
                     font.pixelSize: Appearance.font.pixelSize.smallest
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
                 StyledText {
                     Layout.fillWidth: true
@@ -170,7 +170,7 @@ AnimatedDialog {
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideMiddle
                     font.pixelSize: Appearance.font.pixelSize.smallest
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
                 Item { Layout.fillHeight: true }
             }
@@ -248,7 +248,7 @@ AnimatedDialog {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
                     font.pixelSize: Appearance.font.pixelSize.smallest
-                    color: Appearance.colors.colOnLayer1Inactive
+                    color: Appearance.colors.colOnLayer1
                 }
             }
         }
