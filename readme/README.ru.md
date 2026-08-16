@@ -1,7 +1,7 @@
 # Диспетчер устройств (Device Manager)
 
 Браузер оборудования в стиле диспетчера устройств Windows, написанный на
-**Qt 6 Quick + C++ + CMake**. Интерфейс использует дизайн **Material 3**
+**Qt 6 Quick + C++ + xmake**. Интерфейс использует дизайн **Material 3**
 (тема "ii" от illogical-impulse); бэкенд
 перечисляет реальное оборудование через интерфейс Linux **sysfs**.
 
@@ -9,7 +9,7 @@
 
 ## Зависимости
 
-Инструменты сборки: CMake (≥ 3.16), ninja и компилятор C++17.
+Инструменты сборки: [xmake](https://xmake.io) и компилятор C++17.
 
 Qt 6 (≥ 6.8.2): Core, Gui, Qml, Quick, QuickControls2, Svg, Core5Compat
 (плюс плагин платформы Wayland). Более новые выпуски 6.x (6.9, 6.11 и т. д.)
@@ -18,82 +18,71 @@ Qt 6 (≥ 6.8.2): Core, Gui, Qml, Quick, QuickControls2, Svg, Core5Compat
 ### Fedora
 
 ```sh
-sudo dnf install cmake ninja-build gcc-c++ \
+sudo dnf install gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install cmake ninja-build g++ \
+sudo apt install g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed cmake ninja gcc \
+sudo pacman -S --needed gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install cmake ninja gcc-c++ \
+sudo zypper install gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add cmake ninja g++ \
+sudo apk add g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/cmake dev-util/ninja sys-devel/gcc \
+sudo emerge --ask sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
 ## Сборка
 
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+xmake            # release-сборка (Qt определяется автоматически; при необходимости xmake f --qt=/usr/lib64/qt6)
 ```
+
+`xmake f -m debug && xmake` — отладочная сборка; `xmake f --toolchain=clang && xmake` — Clang.
 
 ## Запуск
 
 ```sh
-./build/device-manager                        # по умолчанию: Wayland, при недоступности — X11
-QT_QPA_PLATFORM=xcb ./build/device-manager    # принудительно X11
+./build/linux/x86_64/release/device-manager                        # по умолчанию: Wayland, при недоступности — X11
+QT_QPA_PLATFORM=xcb ./build/linux/x86_64/release/device-manager    # принудительно X11
 ```
 
 ## Распространение бинарного файла
 
-Бинарные файлы, слинкованные против Qt6Core *без* метки
-`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` (например, в Fedora), содержат
-перемещения `R_X86_64_COPY` и не запускаются в дистрибутивах, где Qt несёт эту
-метку (например, Arch):
+Конфигурация xmake по умолчанию собирает полностью позиционно-независимый код
+(без перемещений `R_X86_64_COPY` и прямых ссылок в тексте), поэтому бинарный
+файл работает и в дистрибутивах, где Qt6Core помечает символы protected с
+`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` (например, Arch) — включая
+обычную сборку GCC, проверено в контейнере Arch. Просто передайте
+`build/linux/x86_64/release/device-manager`.
 
-```
-error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
-```
-
-Чтобы получить бинарный файл, работающий и там, и там, собирайте с Clang — CMake
-автоматически добавит `-fno-direct-access-external-data` и `-z nocopyreloc`
-(у GCC эквивалентного флага нет):
-
-```sh
-cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-clang
-./build-clang/device-manager    # ноль перемещений R_X86_64_COPY
-```
-
-На целевой машине всё равно должны быть установлены библиотеки Qt ≥ 6.8.2
-(QtCore, QtGui, QtQml, QtQuick, QtQuickControls2, QtSvg, QtCore5Compat).
+На целевой машине нужны Qt (≥ минорной версии сборки, например 6.11) и
+стандартные библиотеки рабочего стола.
 
 ## Структура проекта
 

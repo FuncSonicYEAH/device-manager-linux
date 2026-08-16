@@ -1,6 +1,6 @@
 # 裝置管理員 (Device Manager)
 
-一個類似 Windows 裝置管理員的硬體瀏覽器，基於 **Qt 6 Quick + C++ + CMake** 建置。
+一個類似 Windows 裝置管理員的硬體瀏覽器，基於 **Qt 6 Quick + C++ + xmake** 建置。
 UI 沿用 **Material 3** 設計（illogical-impulse 的 "ii" 主題）；
 後端從 Linux **sysfs** 列舉真實硬體。
 
@@ -16,76 +16,68 @@ Qt 6（≥ 6.8.2）：Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Com
 ### Fedora
 
 ```sh
-sudo dnf install cmake ninja-build gcc-c++ \
+sudo dnf install gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install cmake ninja-build g++ \
+sudo apt install g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed cmake ninja gcc \
+sudo pacman -S --needed gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install cmake ninja gcc-c++ \
+sudo zypper install gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add cmake ninja g++ \
+sudo apk add g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/cmake dev-util/ninja sys-devel/gcc \
+sudo emerge --ask sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
 ## 建置
 
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+xmake            # release 建置（自動探測 Qt；必要時 xmake f --qt=/usr/lib64/qt6）
 ```
+
+`xmake f -m debug && xmake` 切換除錯模式；`xmake f --toolchain=clang && xmake` 使用 Clang。
 
 ## 執行
 
 ```sh
-./build/device-manager                        # 預設 Wayland（無法使用時自動回退 X11）
-QT_QPA_PLATFORM=xcb ./build/device-manager    # 強制 X11
+./build/linux/x86_64/release/device-manager                        # 預設 Wayland（無法使用時自動回退 X11）
+QT_QPA_PLATFORM=xcb ./build/linux/x86_64/release/device-manager    # 強制 X11
 ```
 
 ## 分發二進位檔
 
-在未攜帶 `GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` 標記的 Qt6Core（如 Fedora 的）上連結出的二進位檔包含 `R_X86_64_COPY` 重定位，在 Qt 帶有該標記的發行版（如 Arch）上會啟動失敗：
+xmake 預設配置編譯並連結為完全位置無關程式碼（無 `R_X86_64_COPY` 拷貝重定位、無直接
+文字引用），因此產物同樣可以在 Qt6Core 帶 `GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS`
+保護符號標記的發行版（如 Arch）上執行——包括普通 GCC 建置，已在 Arch 容器中實測。
+直接把 `build/linux/x86_64/release/device-manager` 傳給對方即可。
 
-```
-error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
-```
-
-要建置兩邊都能執行的二進位檔，請使用 Clang——CMake 會自動加上 `-fno-direct-access-external-data` 與 `-z nocopyreloc`（GCC 沒有等價選項）：
-
-```sh
-cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-clang
-./build-clang/device-manager    # 零 R_X86_64_COPY 重定位
-```
-
-目標機器仍需要 Qt ≥ 6.8.2 執行庫（QtCore、QtGui、QtQml、QtQuick、QtQuickControls2、QtSvg、QtCore5Compat）。
+目標機器需要 Qt（≥ 建置時的次版本號，如 6.11）以及常見桌面基礎庫。
 
 ## 專案結構
 

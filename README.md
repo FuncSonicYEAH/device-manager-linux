@@ -1,6 +1,6 @@
 # Device Manager (设备管理器)
 
-A Windows Device Manager–style hardware browser built with **Qt 6 Quick + C++ + CMake**.
+A Windows Device Manager–style hardware browser built with **Qt 6 Quick + C++ + xmake**.
 The UI reuses the **Material 3** design (the "ii" theme by illogical-impulse); the
 backend enumerates real hardware from the Linux **sysfs** interface.
 
@@ -8,7 +8,7 @@ backend enumerates real hardware from the Linux **sysfs** interface.
 
 ## Dependencies
 
-Build tools: CMake (≥ 3.16), ninja and a C++17 compiler.
+Build tools: [xmake](https://xmake.io) and a C++17 compiler.
 
 Qt 6 (≥ 6.8.2): Core, Gui, Qml, Quick, QuickControls2, Svg, Core5Compat
 (plus the Wayland platform plugin). Any newer 6.x release — 6.9, 6.11, ...
@@ -17,82 +17,71 @@ Qt 6 (≥ 6.8.2): Core, Gui, Qml, Quick, QuickControls2, Svg, Core5Compat
 ### Fedora
 
 ```sh
-sudo dnf install cmake ninja-build gcc-c++ \
+sudo dnf install gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install cmake ninja-build g++ \
+sudo apt install g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed cmake ninja gcc \
+sudo pacman -S --needed gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install cmake ninja gcc-c++ \
+sudo zypper install gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add cmake ninja g++ \
+sudo apk add g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/cmake dev-util/ninja sys-devel/gcc \
+sudo emerge --ask sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
 ## Build
 
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+xmake            # release build (Qt auto-detected; if needed: xmake f --qt=/usr/lib64/qt6)
 ```
+
+`xmake f -m debug && xmake` switches to a debug build; `xmake f --toolchain=clang && xmake` builds with Clang.
 
 ## Run
 
 ```sh
-./build/device-manager                        # default: Wayland, falls back to X11
-QT_QPA_PLATFORM=xcb ./build/device-manager    # force X11
+./build/linux/x86_64/release/device-manager                        # default: Wayland, falls back to X11
+QT_QPA_PLATFORM=xcb ./build/linux/x86_64/release/device-manager    # force X11
 ```
 
 ## Distributing the binary
 
-Binaries linked against a Qt6Core built *without* the
-`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` note (e.g. Fedora's) contain
-`R_X86_64_COPY` relocations and fail to start on distros whose Qt carries the
-note (e.g. Arch), with:
+The default xmake configuration compiles and links fully position-independent
+(no `R_X86_64_COPY` relocations, no direct text references), so the resulting
+binary also runs on distros whose Qt6Core marks its symbols protected with
+`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` (e.g. Arch) — plain GCC builds
+included, verified in an Arch container. Just hand over
+`build/linux/x86_64/release/device-manager`.
 
-```
-error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
-```
-
-For a binary that runs on both, build with Clang — the CMake setup then adds
-`-fno-direct-access-external-data` + `-z nocopyreloc` automatically (GCC has no
-equivalent flag):
-
-```sh
-cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-clang
-./build-clang/device-manager    # zero R_X86_64_COPY relocations
-```
-
-The target machine still needs Qt ≥ 6.8.2 runtime libraries (QtCore, QtGui,
-QtQml, QtQuick, QtQuickControls2, QtSvg, QtCore5Compat).
+The target machine needs Qt (≥ the minor version used at build time, e.g.
+6.11) and the usual desktop libraries.
 
 ## Layout
 

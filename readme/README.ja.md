@@ -1,6 +1,6 @@
 # デバイスマネージャー (Device Manager)
 
-Windows のデバイスマネージャー風のハードウェアブラウザです。**Qt 6 Quick + C++ + CMake**
+Windows のデバイスマネージャー風のハードウェアブラウザです。**Qt 6 Quick + C++ + xmake**
 で構築されています。UI は **Material 3** デザイン
 (illogical-impulse 氏の "ii" テーマ) を再利用し、バックエンドは Linux の **sysfs**
 から実際のハードウェアを列挙します。
@@ -18,76 +18,70 @@ Qt 6（≥ 6.8.2）: Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Comp
 ### Fedora
 
 ```sh
-sudo dnf install cmake ninja-build gcc-c++ \
+sudo dnf install gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install cmake ninja-build g++ \
+sudo apt install g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed cmake ninja gcc \
+sudo pacman -S --needed gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install cmake ninja gcc-c++ \
+sudo zypper install gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add cmake ninja g++ \
+sudo apk add g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/cmake dev-util/ninja sys-devel/gcc \
+sudo emerge --ask sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
 ## ビルド
 
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+xmake            # リリースビルド（Qt は自動検出。必要なら xmake f --qt=/usr/lib64/qt6）
 ```
+
+`xmake f -m debug && xmake` でデバッグビルド、`xmake f --toolchain=clang && xmake` で Clang を使用。
 
 ## 実行
 
 ```sh
-./build/device-manager                        # 既定: Wayland（不可なら X11 にフォールバック）
-QT_QPA_PLATFORM=xcb ./build/device-manager    # X11 を強制
+./build/linux/x86_64/release/device-manager                        # 既定: Wayland（不可なら X11 にフォールバック）
+QT_QPA_PLATFORM=xcb ./build/linux/x86_64/release/device-manager    # X11 を強制
 ```
 
 ## バイナリの配布
 
-`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` ノートを持たない Qt6Core（例: Fedora）に対してリンクしたバイナリには `R_X86_64_COPY` リロケーションが含まれ、このノートを持つ Qt を採用するディストリビューション（例: Arch）では起動に失敗します:
+xmake のデフォルト設定では完全位置非依存コードとしてコンパイル・リンクされるため
+（`R_X86_64_COPY` リロケーションなし、テキストへの直接参照なし）、Qt6Core が
+`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` でシンボルを保護しているディストリ
+ビューション（例: Arch）でもそのまま動作します。GCC ビルドを含め、Arch コンテナで
+実機検証済みです。`build/linux/x86_64/release/device-manager` をそのまま配布できます。
 
-```
-error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
-```
-
-どちらの環境でも動くバイナリを作るには Clang を使ってください。CMake が `-fno-direct-access-external-data` と `-z nocopyreloc` を自動的に追加します（GCC に同等のオプションはありません）:
-
-```sh
-cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-cmake --build build-clang
-./build-clang/device-manager    # R_X86_64_COPY リロケーション・ゼロ
-```
-
-実行側のマシンには Qt 6.8.2 以上のランタイム（QtCore、QtGui、QtQml、QtQuick、QtQuickControls2、QtSvg、QtCore5Compat）が必要です。
+実行側には Qt（ビルド時のマイナーバージョン以上、例: 6.11）と一般的な
+デスクトップ基本ライブラリが必要です。
 
 ## 構成
 

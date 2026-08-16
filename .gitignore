@@ -1,4 +1,4 @@
 build/
-build-clang/
+.xmake/
 .zcode/
-build-clang/
+dist/
