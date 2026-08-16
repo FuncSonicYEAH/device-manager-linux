@@ -50,7 +50,7 @@ Theme::Theme(QObject *parent)
     rebuildFontFamilies();
 
     auto *pixelSize = QQML_PROPERTY_MAP_CREATE(m_font);
-    pixelSize->insert(QStringLiteral("smallest"), 10);
+    pixelSize->insert(QStringLiteral("smallest"), 12);
     pixelSize->insert(QStringLiteral("smaller"), 12);
     pixelSize->insert(QStringLiteral("smallie"), 13);
     pixelSize->insert(QStringLiteral("small"), 15);

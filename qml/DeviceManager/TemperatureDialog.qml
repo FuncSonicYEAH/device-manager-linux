@@ -114,7 +114,7 @@ AnimatedDialog {
                     }
                     StyledText {
                         text: Tr.t("recording", Tr.language)
-                        font.pixelSize: 11
+                        font.pixelSize: 12
                         color: Appearance.m3colors.m3onErrorContainer
                     }
                 }

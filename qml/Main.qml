@@ -113,6 +113,10 @@ ApplicationWindow {
             networkMonitorDialog.open()
     }
 
+    function openDrivers() {
+        driverDialog.open()
+    }
+
     // Build the right-click menu entries for a device.
     function buildMenuItems(dev) {
         var items = []
@@ -133,6 +137,9 @@ ApplicationWindow {
         if (dev.category === "network" && Monitor.supportsNetMonitoring(dev))
             items.push({ icon: "swap_vert", text: Tr.t("networkMonitorTitle", Tr.language),
                          enabled: true, action: "networkMonitor" })
+        if (dev.driver === "")
+            items.push({ icon: "memory", text: Tr.t("installDriver", Tr.language),
+                         enabled: true, action: "drivers" })
         items.push({ icon: "", text: "", enabled: false, action: "separator" })
         items.push({ icon: "pause_circle", text: Tr.t("suspendDevice", Tr.language),
                      enabled: DeviceActions.supportsAction(dev, "suspend"), action: "suspend" })
@@ -168,6 +175,8 @@ ApplicationWindow {
             root.openGpuMonitor()
         } else if (action === "networkMonitor") {
             root.openNetworkMonitor()
+        } else if (action === "drivers") {
+            root.openDrivers()
         } else if (action === "suspend" || action === "enable" || action === "start") {
             root.actionDevice = root.selectedDevice
             actionWarningDialog.action = action
@@ -355,6 +364,22 @@ ApplicationWindow {
                     color: Appearance.colors.colOnLayer0
                 }
                 StyledToolTip { text: Tr.t("collapseAll", Tr.language) }
+            }
+
+            // driver detection & installation
+            RippleButton {
+                buttonRadius: Appearance.rounding.small
+                implicitWidth: 40
+                implicitHeight: 38
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: root.openDrivers()
+                contentItem: MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: "memory"
+                    iconSize: 20
+                    color: Appearance.colors.colOnLayer0
+                }
+                StyledToolTip { text: Tr.t("driversTitle", Tr.language) }
             }
 
             Item { Layout.fillWidth: true }
@@ -574,6 +599,12 @@ ApplicationWindow {
     NetworkMonitorDialog {
         id: networkMonitorDialog
         device: root.selectedDevice
+    }
+
+    // ---- driver detection & installation dialog ---------------------------------
+    DriverDialog {
+        id: driverDialog
+        onRequestRefresh: root.refresh()
     }
 
     // ---- about dialog -------------------------------------------------------

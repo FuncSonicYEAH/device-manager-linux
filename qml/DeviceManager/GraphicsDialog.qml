@@ -50,7 +50,7 @@ AnimatedDialog {
             }
             StyledText {
                 text: label
-                font.pixelSize: 11
+                font.pixelSize: 12
                 color: supported ? Appearance.m3colors.m3onSuccessContainer
                     : software ? "#4A3800" : Appearance.colors.colOnSurfaceVariant
             }

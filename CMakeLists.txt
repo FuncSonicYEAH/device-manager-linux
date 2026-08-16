@@ -32,6 +32,7 @@ qt_add_executable(device-manager
     src/DeviceActions.cpp src/DeviceActions.h
     src/DeviceManager.cpp src/DeviceManager.h
     src/DeviceEntry.h
+    src/DriverHelper.cpp   src/DriverHelper.h
     src/GraphicsProbe.cpp src/GraphicsProbe.h
     src/MonitorProbe.cpp  src/MonitorProbe.h
     src/SmartReader.cpp   src/SmartReader.h

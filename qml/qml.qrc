@@ -20,6 +20,8 @@
         <file>DeviceManager/SmartDialog.qml</file>
         <file>DeviceManager/ActionWarningDialog.qml</file>
         <file>DeviceManager/ContextMenu.qml</file>
+        <file>DeviceManager/DriverDialog.qml</file>
+        <file>DeviceManager/PackageInstallDialog.qml</file>
         <file>Components/qmldir</file>
         <file>Components/StyledText.qml</file>
         <file>Components/StyledRectangle.qml</file>

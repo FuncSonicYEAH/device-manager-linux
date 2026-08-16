@@ -13,6 +13,7 @@
 #include "Theme.h"
 #include "DeviceManager.h"
 #include "DeviceActions.h"
+#include "DriverHelper.h"
 #include "SmartReader.h"
 #include "GraphicsProbe.h"
 #include "TemperatureProbe.h"
@@ -158,6 +159,48 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    if (argc > 1 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--drivers")) {
+        DriverHelper drivers;
+        drivers.scan();
+        printf("Kernel: %s | package backend: %s (%s)\n",
+               qPrintable(drivers.kernelRelease()), qPrintable(drivers.packageBackendName()),
+               qPrintable(drivers.packageBackend()));
+        const QVariantList missing = drivers.missingDrivers();
+        printf("\nDevices missing drivers: %d\n", int(missing.size()));
+        for (const QVariant &dv : missing) {
+            const QVariantMap d = dv.toMap();
+            printf("  [%s] %s\n        alias: %s\n",
+                   qPrintable(d.value(QStringLiteral("bus")).toString()),
+                   qPrintable(d.value(QStringLiteral("name")).toString()),
+                   qPrintable(d.value(QStringLiteral("modalias")).toString()));
+            const QVariantList cands = d.value(QStringLiteral("candidates")).toList();
+            if (cands.isEmpty()) {
+                printf("        candidates: (none)\n");
+            } else {
+                for (const QVariant &cv : cands) {
+                    const QVariantMap c = cv.toMap();
+                    printf("        candidate: %-24s %s\n",
+                           qPrintable(c.value(QStringLiteral("module")).toString()),
+                           qPrintable(c.value(QStringLiteral("state")).toString()));
+                }
+            }
+        }
+        printf("\nLoaded modules: %d\n", int(drivers.loadedModules().size()));
+        const QVariantList props = drivers.proprietaryScan();
+        printf("\nProprietary driver options: %d\n", int(props.size()));
+        for (const QVariant &pv : props) {
+            const QVariantMap p = pv.toMap();
+            printf("  [%s] %s | pkg: %s | current: %s\n",
+                   qPrintable(p.value(QStringLiteral("key")).toString()),
+                   qPrintable(p.value(QStringLiteral("device")).toString()),
+                   qPrintable(p.value(QStringLiteral("package")).toString()),
+                   qPrintable(p.value(QStringLiteral("currentDriver")).toString()));
+        }
+        if (!drivers.lastError().isEmpty())
+            printf("Scan warning: %s\n", qPrintable(drivers.lastError()));
+        return 0;
+    }
+
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 
     // Optional: force a UI language for testing (e.g. --lang en)
@@ -169,6 +212,7 @@ int main(int argc, char *argv[])
     ColorUtils colorUtils;
     Theme theme;
     DeviceManager deviceManager;
+    DriverHelper driverHelper;
     SmartReader smartReader;
     DeviceActions deviceActions;
     GraphicsProbe graphicsProbe;
@@ -196,6 +240,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("ColorUtils"), &colorUtils);
     engine.rootContext()->setContextProperty(QStringLiteral("Appearance"), &theme);
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceManager"), &deviceManager);
+    engine.rootContext()->setContextProperty(QStringLiteral("Drivers"), &driverHelper);
     engine.rootContext()->setContextProperty(QStringLiteral("Smart"), &smartReader);
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceActions"), &deviceActions);
     engine.rootContext()->setContextProperty(QStringLiteral("Graphics"), &graphicsProbe);
@@ -219,6 +264,7 @@ int main(int argc, char *argv[])
         bool noDialog = false;
         bool monitorDialog = false;
         bool gpuMonitorDialog = false;
+        bool driversDialog = false;
         for (int i = 1; i < argc; ++i) {
             if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--switch") && i + 1 < argc)
                 switchLang = QString::fromLocal8Bit(argv[i + 1]);
@@ -228,6 +274,8 @@ int main(int argc, char *argv[])
                 monitorDialog = true;
             if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--gpu-monitor-dialog"))
                 gpuMonitorDialog = true;
+            if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--drivers-dialog"))
+                driversDialog = true;
         }
         // --monitor-dialog opens the network monitor for the first network
         // device and waits a few seconds so the chart collects samples
@@ -262,6 +310,15 @@ int main(int argc, char *argv[])
                     }
                     QTimer::singleShot(3300, [win, path = QString::fromLocal8Bit(argv[2])]() {
                         win->grabWindow().save(path + QStringLiteral(".gpumon.png"));
+                        qApp->quit();
+                    });
+                    return;
+                }
+                if (driversDialog) {
+                    // open the driver detection & install dialog
+                    QMetaObject::invokeMethod(engine.rootObjects().first(), "openDrivers");
+                    QTimer::singleShot(1500, [win, path = QString::fromLocal8Bit(argv[2])]() {
+                        win->grabWindow().save(path + QStringLiteral(".drivers.png"));
                         qApp->quit();
                     });
                     return;
