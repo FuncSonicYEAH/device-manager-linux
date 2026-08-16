@@ -83,6 +83,12 @@ included, verified in an Arch container. Just hand over
 The target machine needs Qt (≥ the minor version used at build time, e.g.
 6.11) and the usual desktop libraries.
 
+
+Qt symbol versions are backwards compatible, so for the widest reach build on
+the oldest distribution you want to support: a binary built on Debian trixie
+(Qt 6.8.2) also runs on Fedora/Arch with Qt 6.11, while the reverse fails with
+`version Qt_6.11 not found` (verified in distrobox containers).
+
 ## Layout
 
 - `src/DeviceManager.*` — sysfs enumeration engine (device parsing, vendor/driver name tables, grouped views)
