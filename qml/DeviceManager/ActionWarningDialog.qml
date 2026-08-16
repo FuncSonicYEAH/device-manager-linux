@@ -35,7 +35,7 @@ AnimatedDialog {
         : Tr.t("startWarning", Tr.language)
     readonly property string actionRequiresRoot: Tr.t("actionRequiresRoot", Tr.language)
 
-    function reset() {
+    function resetState() {
         root.running = false
         root.done = false
         root.actionOk = false
@@ -63,7 +63,7 @@ AnimatedDialog {
         }
     }
 
-    onOpened: root.reset()
+    onOpened: root.resetState()
 
     contentItem: ColumnLayout {
         spacing: 0
