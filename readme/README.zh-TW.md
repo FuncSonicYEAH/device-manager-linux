@@ -67,9 +67,6 @@ ninja -C build
 ```sh
 ./build/device-manager                        # 預設 Wayland（無法使用時自動回退 X11）
 QT_QPA_PLATFORM=xcb ./build/device-manager    # 強制 X11
-./build/device-manager --dump                 # 列印裝置清單
-./build/device-manager --screenshot out.png [--light]  # 離屏渲染截圖（除錯用）
-./build/device-manager --fontinfo             # 檢視內嵌字型註冊狀態（除錯用）
 ```
 
 ## 專案結構

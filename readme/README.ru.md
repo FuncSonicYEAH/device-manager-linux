@@ -68,9 +68,6 @@ ninja -C build
 ```sh
 ./build/device-manager                        # по умолчанию: Wayland, при недоступности — X11
 QT_QPA_PLATFORM=xcb ./build/device-manager    # принудительно X11
-./build/device-manager --dump                 # вывод списка устройств
-./build/device-manager --screenshot out.png [--light]  # закадровый рендер (отладка)
-./build/device-manager --fontinfo             # состояние регистрации встроенного шрифта (отладка)
 ```
 
 ## Структура проекта

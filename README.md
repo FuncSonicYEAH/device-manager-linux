@@ -67,10 +67,6 @@ ninja -C build
 ```sh
 ./build/device-manager                        # default: Wayland, falls back to X11
 QT_QPA_PLATFORM=xcb ./build/device-manager    # force X11
-./build/device-manager --dump                 # print the device list
-./build/device-manager --screenshot out.png [--light]  # offscreen screenshot (debug)
-./build/device-manager --fontinfo             # show bundled-font registration (debug)
-./build/device-manager --lang en              # force a UI language (debug)
 ```
 
 ## Layout

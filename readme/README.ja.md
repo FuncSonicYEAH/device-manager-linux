@@ -68,9 +68,6 @@ ninja -C build
 ```sh
 ./build/device-manager                        # 既定: Wayland（不可なら X11 にフォールバック）
 QT_QPA_PLATFORM=xcb ./build/device-manager    # X11 を強制
-./build/device-manager --dump                 # デバイス一覧を出力
-./build/device-manager --screenshot out.png [--light]  # オフスクリーン描画（デバッグ用）
-./build/device-manager --fontinfo             # 同梱フォントの登録状態を表示（デバッグ用）
 ```
 
 ## 構成
