@@ -9,7 +9,7 @@ Windows のデバイスマネージャー風のハードウェアブラウザで
 
 ## 依存関係
 
-ビルドツール: CMake（≥ 3.16）、C++17 コンパイラー。
+ビルドツール: CMake（≥ 3.16）、ninja、C++17 コンパイラー。
 
 Qt 6（≥ 6.8.2）: Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
 （さらに Wayland プラットフォームプラグイン）。これより新しい 6.x リリース
@@ -18,42 +18,42 @@ Qt 6（≥ 6.8.2）: Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Comp
 ### Fedora
 
 ```sh
-sudo dnf install cmake gcc-c++ \
+sudo dnf install cmake ninja-build gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install cmake g++ \
+sudo apt install cmake ninja-build g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed cmake gcc \
+sudo pacman -S --needed cmake ninja gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install cmake gcc-c++ \
+sudo zypper install cmake ninja gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add cmake g++ \
+sudo apk add cmake ninja g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/cmake sys-devel/gcc \
+sudo emerge --ask dev-util/cmake dev-util/ninja sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
