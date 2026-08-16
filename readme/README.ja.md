@@ -9,7 +9,7 @@ Windows のデバイスマネージャー風のハードウェアブラウザで
 
 ## 依存関係
 
-ビルドツール: CMake（≥ 3.16）、ninja、C++17 コンパイラー。
+ビルドツール: [xmake](https://xmake.io)、C++17 コンパイラー。
 
 Qt 6（≥ 6.8.2）: Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
 （さらに Wayland プラットフォームプラグイン）。これより新しい 6.x リリース

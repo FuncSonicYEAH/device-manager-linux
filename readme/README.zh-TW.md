@@ -8,7 +8,7 @@ UI 沿用 **Material 3** 設計（illogical-impulse 的 "ii" 主題）；
 
 ## 相依套件
 
-建置工具：CMake（≥ 3.16）、ninja、C++17 編譯器。
+建置工具：[xmake](https://xmake.io)、C++17 編譯器。
 
 Qt 6（≥ 6.8.2）：Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
 （外加 Wayland 平台外掛程式）。更高的 6.x 版本（6.9、6.11 等）同樣可以建置。
