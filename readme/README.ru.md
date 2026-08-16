@@ -71,9 +71,34 @@ cmake --build build
 QT_QPA_PLATFORM=xcb ./build/device-manager    # принудительно X11
 ```
 
+## Распространение бинарного файла
+
+Бинарные файлы, слинкованные против Qt6Core *без* метки
+`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` (например, в Fedora), содержат
+перемещения `R_X86_64_COPY` и не запускаются в дистрибутивах, где Qt несёт эту
+метку (например, Arch):
+
+```
+error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
+```
+
+Чтобы получить бинарный файл, работающий и там, и там, собирайте с Clang — CMake
+автоматически добавит `-fno-direct-access-external-data` и `-z nocopyreloc`
+(у GCC эквивалентного флага нет):
+
+```sh
+cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+cmake --build build-clang
+./build-clang/device-manager    # ноль перемещений R_X86_64_COPY
+```
+
+На целевой машине всё равно должны быть установлены библиотеки Qt ≥ 6.8.2
+(QtCore, QtGui, QtQml, QtQuick, QtQuickControls2, QtSvg, QtCore5Compat).
+
 ## Структура проекта
 
 - `src/DeviceManager.*` — движок перечисления sysfs (разбор устройств, таблицы имён производителей/драйверов, группировка)
+- `src/DriverHelper.*` — движок поиска и установки драйверов (скан устройств без драйверов, загрузка/привязка модулей, поиск и установка пакетов дистрибутива, проприетарные драйверы)
 - `src/Theme.*`, `src/ColorUtils.*` — слой темы Material 3 (контекстные свойства `Appearance` / `ColorUtils`)
 - `qml/Components/` — набор виджетов Material 3 (QML-модуль `Components`)
 - `qml/fonts/` — встроенный вариативный шрифт Material Symbols Rounded

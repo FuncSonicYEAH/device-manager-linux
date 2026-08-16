@@ -71,9 +71,28 @@ cmake --build build
 QT_QPA_PLATFORM=xcb ./build/device-manager    # X11 を強制
 ```
 
+## バイナリの配布
+
+`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` ノートを持たない Qt6Core（例: Fedora）に対してリンクしたバイナリには `R_X86_64_COPY` リロケーションが含まれ、このノートを持つ Qt を採用するディストリビューション（例: Arch）では起動に失敗します:
+
+```
+error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
+```
+
+どちらの環境でも動くバイナリを作るには Clang を使ってください。CMake が `-fno-direct-access-external-data` と `-z nocopyreloc` を自動的に追加します（GCC に同等のオプションはありません）:
+
+```sh
+cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+cmake --build build-clang
+./build-clang/device-manager    # R_X86_64_COPY リロケーション・ゼロ
+```
+
+実行側のマシンには Qt 6.8.2 以上のランタイム（QtCore、QtGui、QtQml、QtQuick、QtQuickControls2、QtSvg、QtCore5Compat）が必要です。
+
 ## 構成
 
 - `src/DeviceManager.*` — sysfs 列挙エンジン（デバイス解析、ベンダー/ドライバー名テーブル、グループビュー）
+- `src/DriverHelper.*` — ドライバー検出・インストールのバックエンド（ドライバー不足スキャン、モジュールのロード/バインド、ディストリパッケージの検索とインストール、プロプライエタリドライバー処理）
 - `src/Theme.*`, `src/ColorUtils.*` — Material 3 テーマ層（`Appearance` / `ColorUtils` コンテキストプロパティ）
 - `qml/Components/` — Material 3 ウィジェット集（`Components` QML モジュール）
 - `qml/fonts/` — 同梱の Material Symbols Rounded 可変フォント

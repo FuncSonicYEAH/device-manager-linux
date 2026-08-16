@@ -69,9 +69,28 @@ cmake --build build
 QT_QPA_PLATFORM=xcb ./build/device-manager    # 強制 X11
 ```
 
+## 分發二進位檔
+
+在未攜帶 `GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` 標記的 Qt6Core（如 Fedora 的）上連結出的二進位檔包含 `R_X86_64_COPY` 重定位，在 Qt 帶有該標記的發行版（如 Arch）上會啟動失敗：
+
+```
+error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
+```
+
+要建置兩邊都能執行的二進位檔，請使用 Clang——CMake 會自動加上 `-fno-direct-access-external-data` 與 `-z nocopyreloc`（GCC 沒有等價選項）：
+
+```sh
+cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+cmake --build build-clang
+./build-clang/device-manager    # 零 R_X86_64_COPY 重定位
+```
+
+目標機器仍需要 Qt ≥ 6.8.2 執行庫（QtCore、QtGui、QtQml、QtQuick、QtQuickControls2、QtSvg、QtCore5Compat）。
+
 ## 專案結構
 
 - `src/DeviceManager.*` — sysfs 列舉引擎（裝置解析、廠商/驅動程式名稱對應表、分組檢視）
+- `src/DriverHelper.*` — 驅動檢測與安裝後端（缺失驅動掃描、模組載入/綁定、發行版套件搜尋與安裝、閉源驅動流程）
 - `src/Theme.*`, `src/ColorUtils.*` — Material 3 主題層（`Appearance` / `ColorUtils` 內容屬性）
 - `qml/Components/` — Material 3 元件庫（`Components` QML 模組）
 - `qml/fonts/` — 內嵌的 Material Symbols Rounded 變數字型
