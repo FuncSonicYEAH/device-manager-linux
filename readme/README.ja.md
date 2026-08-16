@@ -1,6 +1,6 @@
 # デバイスマネージャー (Device Manager)
 
-Windows のデバイスマネージャー風のハードウェアブラウザです。**Qt 6 Quick + C++ + Meson**
+Windows のデバイスマネージャー風のハードウェアブラウザです。**Qt 6 Quick + C++ + CMake**
 で構築されています。UI は **Material 3** デザイン
 (illogical-impulse 氏の "ii" テーマ) を再利用し、バックエンドは Linux の **sysfs**
 から実際のハードウェアを列挙します。
@@ -9,58 +9,59 @@ Windows のデバイスマネージャー風のハードウェアブラウザで
 
 ## 依存関係
 
-ビルドツール: meson、ninja、C++17 コンパイラー、pkg-config。
+ビルドツール: CMake（≥ 3.16）、C++17 コンパイラー。
 
-Qt 6 モジュール: Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
-（さらに Wayland プラットフォームプラグイン）。
+Qt 6（≥ 6.8.2）: Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
+（さらに Wayland プラットフォームプラグイン）。これより新しい 6.x リリース
+（6.9、6.11 など）でもビルドできます。
 
 ### Fedora
 
 ```sh
-sudo dnf install meson ninja-build gcc-c++ \
+sudo dnf install cmake gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install meson ninja-build g++ pkg-config \
+sudo apt install cmake g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed meson ninja gcc \
+sudo pacman -S --needed cmake gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install meson ninja gcc-c++ \
+sudo zypper install cmake gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add meson ninja g++ pkgconfig \
+sudo apk add cmake g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/meson dev-util/ninja sys-devel/gcc \
+sudo emerge --ask dev-util/cmake sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
 ## ビルド
 
 ```sh
-meson setup build
-ninja -C build
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 ```
 
 ## 実行

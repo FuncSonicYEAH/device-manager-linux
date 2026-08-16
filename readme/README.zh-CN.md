@@ -1,6 +1,6 @@
 # 设备管理器 (Device Manager)
 
-一个类似 Windows 设备管理器的硬件浏览器，基于 **Qt 6 Quick + C++ + Meson** 构建。
+一个类似 Windows 设备管理器的硬件浏览器，基于 **Qt 6 Quick + C++ + CMake** 构建。
 UI 复用了 **Material 3** 设计（illogical-impulse 的 "ii" 主题）；
 后端从 Linux **sysfs** 枚举真实硬件。
 
@@ -8,58 +8,58 @@ UI 复用了 **Material 3** 设计（illogical-impulse 的 "ii" 主题）；
 
 ## 依赖
 
-构建工具：meson、ninja、C++17 编译器、pkg-config。
+构建工具：CMake（≥ 3.16）、C++17 编译器。
 
-Qt 6 模块：Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
-（外加 Wayland 平台插件）。
+Qt 6（≥ 6.8.2）：Core、Gui、Qml、Quick、QuickControls2、Svg、Core5Compat
+（外加 Wayland 平台插件）。更高的 6.x 版本（6.9、6.11 等）同样可以构建。
 
 ### Fedora
 
 ```sh
-sudo dnf install meson ninja-build gcc-c++ \
+sudo dnf install cmake gcc-c++ \
   qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtsvg-devel qt6-qt5compat-devel qt6-qtwayland
 ```
 
 ### Ubuntu / Debian
 
 ```sh
-sudo apt install meson ninja-build g++ pkg-config \
+sudo apt install cmake g++ \
   qt6-base-dev qt6-declarative-dev qt6-5compat-dev libqt6svg6-dev qt6-wayland
 ```
 
 ### Arch Linux
 
 ```sh
-sudo pacman -S --needed meson ninja gcc \
+sudo pacman -S --needed cmake gcc \
   qt6-base qt6-declarative qt6-svg qt6-5compat qt6-wayland
 ```
 
 ### openSUSE
 
 ```sh
-sudo zypper install meson ninja gcc-c++ \
+sudo zypper install cmake gcc-c++ \
   qt6-base-devel qt6-declarative-devel qt6-svg-devel qt6-qt5compat-devel qt6-wayland
 ```
 
 ### Alpine Linux
 
 ```sh
-sudo apk add meson ninja g++ pkgconfig \
+sudo apk add cmake g++ \
   qt6-qtbase-dev qt6-qtdeclarative-dev qt6-qtsvg-dev qt6-qt5compat-dev qt6-qtwayland
 ```
 
 ### Gentoo
 
 ```sh
-sudo emerge --ask dev-util/meson dev-util/ninja sys-devel/gcc \
+sudo emerge --ask dev-util/cmake sys-devel/gcc \
   dev-qt/qtbase:6 dev-qt/qtdeclarative:6 dev-qt/qtsvg:6 dev-qt/qt5compat:6 dev-qt/qtwayland:6
 ```
 
 ## 构建
 
 ```sh
-meson setup build
-ninja -C build
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 ```
 
 ## 运行
