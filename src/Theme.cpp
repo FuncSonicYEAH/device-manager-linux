@@ -10,17 +10,25 @@
 
 #include "ColorUtils.h"
 
+// QQmlPropertyMap::create() was only added in Qt 6.9; Qt 6.8.2 (the minimum
+// supported version) relies on the plain constructor instead.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#define QQML_PROPERTY_MAP_CREATE(parent) QQmlPropertyMap::create(parent)
+#else
+#define QQML_PROPERTY_MAP_CREATE(parent) new QQmlPropertyMap(parent)
+#endif
+
 Theme::Theme(QObject *parent)
     : QObject(parent)
 {
     m_colorUtils = new ColorUtils(this);
 
-    m_m3colors = QQmlPropertyMap::create(this);
-    m_colors = QQmlPropertyMap::create(this);
-    m_rounding = QQmlPropertyMap::create(this);
-    m_font = QQmlPropertyMap::create(this);
-    m_animation = QQmlPropertyMap::create(this);
-    m_animationCurves = QQmlPropertyMap::create(this);
+    m_m3colors = QQML_PROPERTY_MAP_CREATE(this);
+    m_colors = QQML_PROPERTY_MAP_CREATE(this);
+    m_rounding = QQML_PROPERTY_MAP_CREATE(this);
+    m_font = QQML_PROPERTY_MAP_CREATE(this);
+    m_animation = QQML_PROPERTY_MAP_CREATE(this);
+    m_animationCurves = QQML_PROPERTY_MAP_CREATE(this);
 
     // Rounding tokens (Appearance.rounding)
     m_rounding->insert(QStringLiteral("unsharpen"), 2);
@@ -37,11 +45,11 @@ Theme::Theme(QObject *parent)
     // Font tokens (Appearance.font). The family names are filled from the
     // desktop Qt font configuration below (KDE, qt6ct, ...) so the text
     // follows the user's system font instead of a hardcoded default.
-    m_fontFamily = QQmlPropertyMap::create(m_font);
+    m_fontFamily = QQML_PROPERTY_MAP_CREATE(m_font);
     m_font->insert(QStringLiteral("family"), QVariant::fromValue(m_fontFamily));
     rebuildFontFamilies();
 
-    auto *pixelSize = QQmlPropertyMap::create(m_font);
+    auto *pixelSize = QQML_PROPERTY_MAP_CREATE(m_font);
     pixelSize->insert(QStringLiteral("smallest"), 10);
     pixelSize->insert(QStringLiteral("smaller"), 12);
     pixelSize->insert(QStringLiteral("smallie"), 13);
@@ -54,8 +62,8 @@ Theme::Theme(QObject *parent)
     pixelSize->insert(QStringLiteral("title"), 22);
     m_font->insert(QStringLiteral("pixelSize"), QVariant::fromValue(pixelSize));
 
-    auto *variableAxes = QQmlPropertyMap::create(m_font);
-    auto *mainAxes = QQmlPropertyMap::create(m_font);
+    auto *variableAxes = QQML_PROPERTY_MAP_CREATE(m_font);
+    auto *mainAxes = QQML_PROPERTY_MAP_CREATE(m_font);
     mainAxes->insert(QStringLiteral("wght"), 450);
     mainAxes->insert(QStringLiteral("wdth"), 100);
     variableAxes->insert(QStringLiteral("main"), QVariant::fromValue(mainAxes));
@@ -93,37 +101,37 @@ Theme::Theme(QObject *parent)
     m_animationCurves->insert(QStringLiteral("expressiveEffectsDuration"), 200);
 
     // Animation groups (Appearance.animation)
-    auto *elementMove = QQmlPropertyMap::create(m_animation);
+    auto *elementMove = QQML_PROPERTY_MAP_CREATE(m_animation);
     elementMove->insert(QStringLiteral("duration"), 500);
     elementMove->insert(QStringLiteral("bezierCurve"), defaultSpatial);
     elementMove->insert(QStringLiteral("velocity"), 650);
     m_animation->insert(QStringLiteral("elementMove"), QVariant::fromValue(elementMove));
 
-    auto *elementMoveFast = QQmlPropertyMap::create(m_animation);
+    auto *elementMoveFast = QQML_PROPERTY_MAP_CREATE(m_animation);
     elementMoveFast->insert(QStringLiteral("duration"), 200);
     elementMoveFast->insert(QStringLiteral("bezierCurve"), effects);
     elementMoveFast->insert(QStringLiteral("velocity"), 850);
     m_animation->insert(QStringLiteral("elementMoveFast"), QVariant::fromValue(elementMoveFast));
 
-    auto *elementMoveEnter = QQmlPropertyMap::create(m_animation);
+    auto *elementMoveEnter = QQML_PROPERTY_MAP_CREATE(m_animation);
     elementMoveEnter->insert(QStringLiteral("duration"), 400);
     elementMoveEnter->insert(QStringLiteral("bezierCurve"), emphasizedDecel);
     elementMoveEnter->insert(QStringLiteral("velocity"), 650);
     m_animation->insert(QStringLiteral("elementMoveEnter"), QVariant::fromValue(elementMoveEnter));
 
-    auto *elementMoveExit = QQmlPropertyMap::create(m_animation);
+    auto *elementMoveExit = QQML_PROPERTY_MAP_CREATE(m_animation);
     elementMoveExit->insert(QStringLiteral("duration"), 200);
     elementMoveExit->insert(QStringLiteral("bezierCurve"), emphasizedAccel);
     elementMoveExit->insert(QStringLiteral("velocity"), 650);
     m_animation->insert(QStringLiteral("elementMoveExit"), QVariant::fromValue(elementMoveExit));
 
-    auto *elementResize = QQmlPropertyMap::create(m_animation);
+    auto *elementResize = QQML_PROPERTY_MAP_CREATE(m_animation);
     elementResize->insert(QStringLiteral("duration"), 300);
     elementResize->insert(QStringLiteral("bezierCurve"), emphasized);
     elementResize->insert(QStringLiteral("velocity"), 650);
     m_animation->insert(QStringLiteral("elementResize"), QVariant::fromValue(elementResize));
 
-    auto *clickBounce = QQmlPropertyMap::create(m_animation);
+    auto *clickBounce = QQML_PROPERTY_MAP_CREATE(m_animation);
     clickBounce->insert(QStringLiteral("duration"), 400);
     clickBounce->insert(QStringLiteral("bezierCurve"), defaultSpatial);
     clickBounce->insert(QStringLiteral("velocity"), 850);
