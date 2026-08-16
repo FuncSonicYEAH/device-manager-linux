@@ -70,9 +70,34 @@ cmake --build build
 QT_QPA_PLATFORM=xcb ./build/device-manager    # force X11
 ```
 
+## Distributing the binary
+
+Binaries linked against a Qt6Core built *without* the
+`GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS` note (e.g. Fedora's) contain
+`R_X86_64_COPY` relocations and fail to start on distros whose Qt carries the
+note (e.g. Arch), with:
+
+```
+error due to GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS
+```
+
+For a binary that runs on both, build with Clang — the CMake setup then adds
+`-fno-direct-access-external-data` + `-z nocopyreloc` automatically (GCC has no
+equivalent flag):
+
+```sh
+cmake -S . -B build-clang -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+cmake --build build-clang
+./build-clang/device-manager    # zero R_X86_64_COPY relocations
+```
+
+The target machine still needs Qt ≥ 6.8.2 runtime libraries (QtCore, QtGui,
+QtQml, QtQuick, QtQuickControls2, QtSvg, QtCore5Compat).
+
 ## Layout
 
 - `src/DeviceManager.*` — sysfs enumeration engine (device parsing, vendor/driver name tables, grouped views)
+- `src/DriverHelper.*` — driver detection & install backend (missing-driver scan, module load/bind, distro package search & install, proprietary driver flows)
 - `src/Translator.*` — lightweight i18n (dictionaries in `qml/i18n/translations.json`, exposed as the `Tr` context property)
 - `src/Theme.*`, `src/ColorUtils.*` — Material 3 theme layer (`Appearance` / `ColorUtils` context properties)
 - `qml/Components/` — Material 3 widget set (the `Components` QML module)

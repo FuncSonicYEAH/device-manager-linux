@@ -61,6 +61,24 @@ if(MSVC)
     target_compile_options(device-manager PRIVATE /W4)
 else()
     target_compile_options(device-manager PRIVATE -Wall -Wextra)
+    # Avoid R_X86_64_COPY relocations against Qt's protected data symbols
+    # (QTimer::staticMetaObject etc.). Binaries linked with copy relocations
+    # fail to start on systems whose libQt6Core.so.6 carries the
+    # GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS note (Qt built with newer
+    # binutils, e.g. on Arch). Clang can emit GOT-indirect accesses for all
+    # external data (`-fno-direct-access-external-data`, no GCC equivalent),
+    # which pairs with `-z nocopyreloc` to remove the copy relocations — so
+    # build with clang++ when distributing the binary to other distros:
+    #   cmake -S . -B build-clang -G Ninja -DCMAKE_CXX_COMPILER=clang++
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        include(CheckCXXCompilerFlag)
+        check_cxx_compiler_flag("-fno-direct-access-external-data"
+            CXX_SUPPORTS_NO_DIRECT_EXTERNAL_DATA)
+        if(CXX_SUPPORTS_NO_DIRECT_EXTERNAL_DATA)
+            target_compile_options(device-manager PRIVATE -fno-direct-access-external-data)
+            target_link_options(device-manager PRIVATE -Wl,-z,nocopyreloc -Wl,-z,notext)
+        endif()
+    endif()
 endif()
 
 install(TARGETS device-manager
