@@ -12,6 +12,9 @@
         <file>DeviceManager/SettingsDialog.qml</file>
         <file>DeviceManager/GraphicsDialog.qml</file>
         <file>DeviceManager/TemperatureDialog.qml</file>
+        <file>DeviceManager/GpuMonitorDialog.qml</file>
+        <file>DeviceManager/NetworkMonitorDialog.qml</file>
+        <file>DeviceManager/LineChart.qml</file>
         <file>DeviceManager/AboutDialog.qml</file>
         <file>DeviceManager/StatusBadge.qml</file>
         <file>DeviceManager/SmartDialog.qml</file>

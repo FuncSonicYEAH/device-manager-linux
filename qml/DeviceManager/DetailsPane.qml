@@ -14,6 +14,27 @@ Item {
     signal smartRequested()
     signal graphicsRequested()
     signal temperatureRequested()
+    signal gpuMonitorRequested()
+    signal networkMonitorRequested()
+
+    // Button text uses StyledText with Appearance.font.pixelSize.small (15px);
+    // size the text buttons from their label length so they fit every language:
+    // full-width glyphs (CJK) take a whole em, latin/digits roughly half.
+    function textButtonWidth(text) {
+        if (text === undefined || text === null)
+            return 0
+        var full = Appearance.font.pixelSize.small
+        var half = Math.round(full * 0.55)
+        var w = 0
+        for (var i = 0; i < text.length; i++) {
+            var code = text.charCodeAt(i)
+            if (code > 0x2E7F)
+                w += full
+            else
+                w += half
+        }
+        return w + 24 // horizontal padding
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -113,22 +134,22 @@ Item {
                     }
                 }
 
-                // actions
-                RowLayout {
+                // actions (flow wraps onto a second line when the pane is narrow)
+                Flow {
                     Layout.fillWidth: true
                     spacing: 8
 
                     RippleButton {
                         buttonText: Tr.t("properties", Tr.language)
                         buttonRadius: Appearance.rounding.small
-                        implicitWidth: 90
+                        implicitWidth: root.textButtonWidth(Tr.t("properties", Tr.language))
                         implicitHeight: 36
                         onClicked: root.propertiesRequested()
                     }
                     RippleButton {
                         buttonText: Tr.t("scanHardwareChanges", Tr.language)
                         buttonRadius: Appearance.rounding.small
-                        implicitWidth: 130
+                        implicitWidth: root.textButtonWidth(Tr.t("scanHardwareChanges", Tr.language))
                         implicitHeight: 36
                         onClicked: root.refreshRequested()
                     }
@@ -136,7 +157,7 @@ Item {
                         visible: root.device !== null && root.device.category === "disk"
                         buttonText: Tr.t("smartHealthCheck", Tr.language)
                         buttonRadius: Appearance.rounding.small
-                        implicitWidth: 120
+                        implicitWidth: root.textButtonWidth(Tr.t("smartHealthCheck", Tr.language))
                         implicitHeight: 36
                         onClicked: root.smartRequested()
                     }
@@ -144,7 +165,7 @@ Item {
                         visible: root.device !== null && root.device.category === "display"
                         buttonText: Tr.t("graphicsSupportTitle", Tr.language)
                         buttonRadius: Appearance.rounding.small
-                        implicitWidth: 130
+                        implicitWidth: root.textButtonWidth(Tr.t("graphicsSupportTitle", Tr.language))
                         implicitHeight: 36
                         onClicked: root.graphicsRequested()
                     }
@@ -152,11 +173,28 @@ Item {
                         visible: root.device !== null && Temperature.supportsTemperature(root.device)
                         buttonText: Tr.t("temperatureCurveTitle", Tr.language)
                         buttonRadius: Appearance.rounding.small
-                        implicitWidth: 100
+                        implicitWidth: root.textButtonWidth(Tr.t("temperatureCurveTitle", Tr.language))
                         implicitHeight: 36
                         onClicked: root.temperatureRequested()
                     }
-                    Item { Layout.fillWidth: true }
+                    RippleButton {
+                        visible: root.device !== null && root.device.category === "display"
+                                 && Monitor.supportsGpuMonitoring(root.device)
+                        buttonText: Tr.t("gpuMonitorTitle", Tr.language)
+                        buttonRadius: Appearance.rounding.small
+                        implicitWidth: root.textButtonWidth(Tr.t("gpuMonitorTitle", Tr.language))
+                        implicitHeight: 36
+                        onClicked: root.gpuMonitorRequested()
+                    }
+                    RippleButton {
+                        visible: root.device !== null && root.device.category === "network"
+                                 && Monitor.supportsNetMonitoring(root.device)
+                        buttonText: Tr.t("networkMonitorTitle", Tr.language)
+                        buttonRadius: Appearance.rounding.small
+                        implicitWidth: root.textButtonWidth(Tr.t("networkMonitorTitle", Tr.language))
+                        implicitHeight: 36
+                        onClicked: root.networkMonitorRequested()
+                    }
                     RippleButton {
                         buttonRadius: Appearance.rounding.small
                         implicitWidth: 36

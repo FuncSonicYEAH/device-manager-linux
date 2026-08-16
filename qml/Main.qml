@@ -103,6 +103,16 @@ ApplicationWindow {
             temperatureDialog.open()
     }
 
+    function openGpuMonitor() {
+        if (root.selectedDevice !== null)
+            gpuMonitorDialog.open()
+    }
+
+    function openNetworkMonitor() {
+        if (root.selectedDevice !== null)
+            networkMonitorDialog.open()
+    }
+
     // Build the right-click menu entries for a device.
     function buildMenuItems(dev) {
         var items = []
@@ -117,6 +127,12 @@ ApplicationWindow {
         if (Temperature.supportsTemperature(dev))
             items.push({ icon: "thermostat", text: Tr.t("temperatureCurveTitle", Tr.language),
                          enabled: true, action: "temperature" })
+        if (dev.category === "display" && Monitor.supportsGpuMonitoring(dev))
+            items.push({ icon: "monitor_heart", text: Tr.t("gpuMonitorTitle", Tr.language),
+                         enabled: true, action: "gpuMonitor" })
+        if (dev.category === "network" && Monitor.supportsNetMonitoring(dev))
+            items.push({ icon: "swap_vert", text: Tr.t("networkMonitorTitle", Tr.language),
+                         enabled: true, action: "networkMonitor" })
         items.push({ icon: "", text: "", enabled: false, action: "separator" })
         items.push({ icon: "pause_circle", text: Tr.t("suspendDevice", Tr.language),
                      enabled: DeviceActions.supportsAction(dev, "suspend"), action: "suspend" })
@@ -148,6 +164,10 @@ ApplicationWindow {
             root.openGraphics()
         } else if (action === "temperature") {
             root.openTemperature()
+        } else if (action === "gpuMonitor") {
+            root.openGpuMonitor()
+        } else if (action === "networkMonitor") {
+            root.openNetworkMonitor()
         } else if (action === "suspend" || action === "enable" || action === "start") {
             root.actionDevice = root.selectedDevice
             actionWarningDialog.action = action
@@ -474,6 +494,8 @@ ApplicationWindow {
                     onSmartRequested: root.openSmart()
                     onGraphicsRequested: root.openGraphics()
                     onTemperatureRequested: root.openTemperature()
+                    onGpuMonitorRequested: root.openGpuMonitor()
+                    onNetworkMonitorRequested: root.openNetworkMonitor()
                 }
             }
         }
@@ -539,6 +561,18 @@ ApplicationWindow {
     // ---- temperature curve dialog --------------------------------------------
     TemperatureDialog {
         id: temperatureDialog
+        device: root.selectedDevice
+    }
+
+    // ---- GPU monitor dialog ----------------------------------------------------
+    GpuMonitorDialog {
+        id: gpuMonitorDialog
+        device: root.selectedDevice
+    }
+
+    // ---- network traffic dialog ------------------------------------------------
+    NetworkMonitorDialog {
+        id: networkMonitorDialog
         device: root.selectedDevice
     }
 

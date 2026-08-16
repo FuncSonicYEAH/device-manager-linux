@@ -234,7 +234,19 @@
     "stopMonitoring": "停止记录",
     "clear": "清除",
     "waitingData": "等待采样数据…",
-    "noTemperatureSource": "未找到该设备的温度传感器"
+    "noTemperatureSource": "未找到该设备的温度传感器",
+    "gpuMonitorTitle": "GPU 监控",
+    "gpuMonitorSubtitle": "实时监测 GPU 占用与显存",
+    "networkMonitorTitle": "网络流量",
+    "networkMonitorSubtitle": "实时统计网络收发速率",
+    "gpuUtilization": "GPU 占用",
+    "vramUsage": "显存占用",
+    "rxRate": "接收速率",
+    "txRate": "发送速率",
+    "rxTotalFormat": "累计接收 %1",
+    "txTotalFormat": "累计发送 %1",
+    "noGpuMonitorSource": "该 GPU 未提供实时占用统计",
+    "noNetworkInterface": "未找到可用的网络接口"
   },
   "en": {
     "appTitle": "Device Manager",
@@ -471,7 +483,19 @@
     "stopMonitoring": "Stop recording",
     "clear": "Clear",
     "waitingData": "Waiting for samples…",
-    "noTemperatureSource": "No temperature sensors found for this device"
+    "noTemperatureSource": "No temperature sensors found for this device",
+    "gpuMonitorTitle": "GPU monitor",
+    "gpuMonitorSubtitle": "Live GPU utilization and VRAM usage",
+    "networkMonitorTitle": "Network traffic",
+    "networkMonitorSubtitle": "Live RX / TX rates of the interface",
+    "gpuUtilization": "GPU utilization",
+    "vramUsage": "VRAM usage",
+    "rxRate": "Receive rate",
+    "txRate": "Transmit rate",
+    "rxTotalFormat": "received %1",
+    "txTotalFormat": "sent %1",
+    "noGpuMonitorSource": "This GPU does not expose usage statistics",
+    "noNetworkInterface": "No network interfaces available"
   },
   "zh_TW": {
     "appTitle": "裝置管理員",
@@ -708,7 +732,19 @@
     "stopMonitoring": "停止記錄",
     "clear": "清除",
     "waitingData": "等待取樣資料…",
-    "noTemperatureSource": "找不到此裝置的溫度感應器"
+    "noTemperatureSource": "找不到此裝置的溫度感應器",
+    "gpuMonitorTitle": "GPU 監控",
+    "gpuMonitorSubtitle": "即時監測 GPU 使用率與視訊記憶體",
+    "networkMonitorTitle": "網路流量",
+    "networkMonitorSubtitle": "即時統計網路收發速率",
+    "gpuUtilization": "GPU 使用率",
+    "vramUsage": "視訊記憶體使用量",
+    "rxRate": "接收速率",
+    "txRate": "傳送速率",
+    "rxTotalFormat": "累計接收 %1",
+    "txTotalFormat": "累計傳送 %1",
+    "noGpuMonitorSource": "此 GPU 未提供即時使用率統計",
+    "noNetworkInterface": "找不到可用的網路介面"
   },
   "ja": {
     "appTitle": "デバイスマネージャー",
@@ -945,7 +981,19 @@
     "stopMonitoring": "記録停止",
     "clear": "クリア",
     "waitingData": "サンプル待機中…",
-    "noTemperatureSource": "このデバイスの温度センサーが見つかりません"
+    "noTemperatureSource": "このデバイスの温度センサーが見つかりません",
+    "gpuMonitorTitle": "GPU モニター",
+    "gpuMonitorSubtitle": "GPU 使用率とビデオメモリをリアルタイム表示",
+    "networkMonitorTitle": "ネットワークトラフィック",
+    "networkMonitorSubtitle": "インターフェースの送受信レートをリアルタイム表示",
+    "gpuUtilization": "GPU 使用率",
+    "vramUsage": "ビデオメモリ使用量",
+    "rxRate": "受信レート",
+    "txRate": "送信レート",
+    "rxTotalFormat": "累計受信 %1",
+    "txTotalFormat": "累計送信 %1",
+    "noGpuMonitorSource": "この GPU は使用率統計を提供していません",
+    "noNetworkInterface": "利用可能なネットワークインターフェースがありません"
   },
   "ru": {
     "appTitle": "Диспетчер устройств",
@@ -1182,6 +1230,18 @@
     "stopMonitoring": "Остановить запись",
     "clear": "Очистить",
     "waitingData": "Ожидание данных…",
-    "noTemperatureSource": "Для этого устройства датчики температуры не найдены"
+    "noTemperatureSource": "Для этого устройства датчики температуры не найдены",
+    "gpuMonitorTitle": "Мониторинг GPU",
+    "gpuMonitorSubtitle": "Загрузка GPU и использование видеопамяти в реальном времени",
+    "networkMonitorTitle": "Сетевой трафик",
+    "networkMonitorSubtitle": "Скорость приёма и передачи интерфейса",
+    "gpuUtilization": "Загрузка GPU",
+    "vramUsage": "Видеопамять",
+    "rxRate": "Приём",
+    "txRate": "Передача",
+    "rxTotalFormat": "принято %1",
+    "txTotalFormat": "отправлено %1",
+    "noGpuMonitorSource": "Этот GPU не предоставляет статистику загрузки",
+    "noNetworkInterface": "Сетевые интерфейсы недоступны"
   }
 }

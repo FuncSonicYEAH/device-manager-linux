@@ -16,6 +16,7 @@
 #include "SmartReader.h"
 #include "GraphicsProbe.h"
 #include "TemperatureProbe.h"
+#include "MonitorProbe.h"
 #include "AboutInfo.h"
 #include "Translator.h"
 
@@ -87,6 +88,55 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    if (argc > 1 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--monitorinfo")) {
+        MonitorProbe probe;
+        const QVariantList gpus = probe.gpus();
+        printf("GPUs (monitorable): %d\n", int(gpus.size()));
+        for (const QVariant &gv : gpus) {
+            const QVariantMap g = gv.toMap();
+            printf("  %-28s | %-10s | busy:%-3s | vram:%-3s | %s\n",
+                   qPrintable(g.value(QStringLiteral("name")).toString()),
+                   qPrintable(g.value(QStringLiteral("driver")).toString()),
+                   g.value(QStringLiteral("busySupported")).toBool() ? "yes" : "no",
+                   g.value(QStringLiteral("vramSupported")).toBool() ? "yes" : "no",
+                   g.value(QStringLiteral("monitorable")).toBool() ? "monitorable" : "n/a");
+        }
+        const QVariantList nets = probe.netInterfaces();
+        printf("Network interfaces: %d\n", int(nets.size()));
+        for (const QVariant &nv : nets) {
+            const QVariantMap n = nv.toMap();
+            printf("  %-12s | rx=%s | tx=%s\n",
+                   qPrintable(n.value(QStringLiteral("name")).toString()),
+                   qPrintable(QString::number(n.value(QStringLiteral("rxTotal")).toDouble())),
+                   qPrintable(QString::number(n.value(QStringLiteral("txTotal")).toDouble())));
+        }
+        // sample the first non-loopback interface for ~3 seconds to exercise
+        // the rate computation path
+        QString iface;
+        for (const QVariant &nv : nets) {
+            const QString n = nv.toMap().value(QStringLiteral("name")).toString();
+            if (n != QLatin1String("lo")) {
+                iface = n;
+                break;
+            }
+        }
+        if (iface.isEmpty())
+            return 0;
+        probe.startNet(iface);
+        QTimer::singleShot(3300, [&]() {
+            printf("Network sample on '%s': %d points\n", qPrintable(iface), int(probe.netHistory().size()));
+            for (const QVariant &hv : probe.netHistory()) {
+                const QVariantMap h = hv.toMap();
+                printf("  t=%-4d rx=%8.1f B/s tx=%8.1f B/s\n",
+                       h.value(QStringLiteral("time")).toInt(),
+                       h.value(QStringLiteral("rx")).toDouble(),
+                       h.value(QStringLiteral("tx")).toDouble());
+            }
+            qApp->quit();
+        });
+        return app.exec();
+    }
+
     if (argc > 1 && QString::fromLocal8Bit(argv[1]) == QLatin1String("--dump")) {
         DeviceManager dm;
         const QVariantList groups = dm.typeGroups();
@@ -123,6 +173,7 @@ int main(int argc, char *argv[])
     DeviceActions deviceActions;
     GraphicsProbe graphicsProbe;
     TemperatureProbe temperatureProbe;
+    MonitorProbe monitorProbe;
     AboutInfo aboutInfo;
     // re-enumerate so the device groups are rebuilt in the new language
     bool noRefresh = false;
@@ -149,6 +200,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("DeviceActions"), &deviceActions);
     engine.rootContext()->setContextProperty(QStringLiteral("Graphics"), &graphicsProbe);
     engine.rootContext()->setContextProperty(QStringLiteral("Temperature"), &temperatureProbe);
+    engine.rootContext()->setContextProperty(QStringLiteral("Monitor"), &monitorProbe);
     engine.rootContext()->setContextProperty(QStringLiteral("AboutInfo"), &aboutInfo);
     engine.rootContext()->setContextProperty(QStringLiteral("Tr"), Translator::instance());
 
@@ -165,12 +217,20 @@ int main(int argc, char *argv[])
         // the first capture and takes a second one (retranslate check)
         QString switchLang;
         bool noDialog = false;
-        for (int i = 1; i < argc - 1; ++i) {
-            if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--switch"))
+        bool monitorDialog = false;
+        bool gpuMonitorDialog = false;
+        for (int i = 1; i < argc; ++i) {
+            if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--switch") && i + 1 < argc)
                 switchLang = QString::fromLocal8Bit(argv[i + 1]);
             if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--no-dialog"))
                 noDialog = true;
+            if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--monitor-dialog"))
+                monitorDialog = true;
+            if (QString::fromLocal8Bit(argv[i]) == QLatin1String("--gpu-monitor-dialog"))
+                gpuMonitorDialog = true;
         }
+        // --monitor-dialog opens the network monitor for the first network
+        // device and waits a few seconds so the chart collects samples
         QTimer::singleShot(900, [&]() {
             if (auto *win = qobject_cast<QQuickWindow *>(engine.rootObjects().first())) {
                 // select the first device so the details pane is populated
@@ -185,6 +245,47 @@ int main(int argc, char *argv[])
                     // open the properties dialog to verify its styling
                     if (!noDialog)
                         QMetaObject::invokeMethod(engine.rootObjects().first(), "openProperties");
+                }
+                if (gpuMonitorDialog) {
+                    // find the first display device and open the GPU monitor
+                    for (const QVariant &gv : groups) {
+                        const QVariantMap g = gv.toMap();
+                        if (g.value(QStringLiteral("key")).toString() != QLatin1String("display"))
+                            continue;
+                        const QVariantList devs = g.value(QStringLiteral("devices")).toList();
+                        if (devs.isEmpty())
+                            break;
+                        QMetaObject::invokeMethod(engine.rootObjects().first(),
+                                                  "selectDevice", Q_ARG(QVariant, devs.first()));
+                        QMetaObject::invokeMethod(engine.rootObjects().first(), "openGpuMonitor");
+                        break;
+                    }
+                    QTimer::singleShot(3300, [win, path = QString::fromLocal8Bit(argv[2])]() {
+                        win->grabWindow().save(path + QStringLiteral(".gpumon.png"));
+                        qApp->quit();
+                    });
+                    return;
+                }
+                if (monitorDialog) {
+                    // find the first network device
+                    for (const QVariant &gv : groups) {
+                        const QVariantMap g = gv.toMap();
+                        if (g.value(QStringLiteral("key")).toString() != QLatin1String("network"))
+                            continue;
+                        const QVariantList devs = g.value(QStringLiteral("devices")).toList();
+                        if (devs.isEmpty())
+                            break;
+                        QMetaObject::invokeMethod(engine.rootObjects().first(),
+                                                  "selectDevice", Q_ARG(QVariant, devs.first()));
+                        QMetaObject::invokeMethod(engine.rootObjects().first(), "openNetworkMonitor");
+                        break;
+                    }
+                    // let the monitor collect ~3s of samples before the grab
+                    QTimer::singleShot(3300, [win, path = QString::fromLocal8Bit(argv[2])]() {
+                        win->grabWindow().save(path + QStringLiteral(".monitor.png"));
+                        qApp->quit();
+                    });
+                    return;
                 }
                 const QImage img = win->grabWindow();
                 img.save(QString::fromLocal8Bit(argv[2]));
