@@ -14,7 +14,7 @@ AnimatedDialog {
     property var device: null
 
     width: Math.min(780, parent.width * 0.9)
-    height: Math.min(620, parent.height * 0.92)
+    height: Math.min(720, parent.height * 0.94)
 
     readonly property bool running: Monitor.gpuRunning
     readonly property var history: Monitor.gpuHistory
@@ -134,7 +134,7 @@ AnimatedDialog {
                     }
                     StyledText {
                         text: Tr.t("recording", Tr.language)
-                        font.pixelSize: 11
+                        font.pixelSize: 12
                         color: Appearance.m3colors.m3onErrorContainer
                     }
                 }
@@ -377,6 +377,167 @@ AnimatedDialog {
                     fixedMax: root.vramTotalNow >= 0 ? root.vramTotalNow : Number.NaN
                     unit: ""
                     formatValue: function(v) { return root.formatVramAxis(v) }
+                }
+            }
+        }
+
+        // ---- process usage ------------------------------------------------
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.leftMargin: 18
+            Layout.rightMargin: 18
+            Layout.bottomMargin: 4
+            spacing: 4
+            visible: root.supported
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+                MaterialSymbol {
+                    text: "apps"
+                    iconSize: 16
+                    color: Appearance.colors.colOnLayer1Inactive
+                }
+                StyledText {
+                    text: Tr.t("processUsage", Tr.language)
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnLayer1
+                }
+                Item { Layout.fillWidth: true }
+                StyledText {
+                    visible: Monitor.processesLimited()
+                    text: Tr.t("processesLimitedHint", Tr.language)
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    color: Appearance.colors.colOnLayer1Inactive
+                }
+            }
+
+            // column headers
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 8
+                Layout.rightMargin: 8
+                spacing: 12
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Tr.t("processColumn", Tr.language)
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    color: Appearance.colors.colOnLayer1Inactive
+                }
+                StyledText {
+                    Layout.preferredWidth: 130
+                    horizontalAlignment: Text.AlignRight
+                    text: Tr.t("gpuUtilization", Tr.language)
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    color: Appearance.colors.colOnLayer1Inactive
+                }
+                StyledText {
+                    Layout.preferredWidth: 90
+                    horizontalAlignment: Text.AlignRight
+                    text: Tr.t("vramUsage", Tr.language)
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    color: Appearance.colors.colOnLayer1Inactive
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 170
+                radius: Appearance.rounding.normal
+                color: Appearance.m3colors.m3surfaceContainerHigh
+                clip: true
+
+                StyledText {
+                    anchors.centerIn: parent
+                    visible: Monitor.gpuProcesses.length === 0
+                    text: Tr.t("gpuProcessNone", Tr.language)
+                    font.pixelSize: Appearance.font.pixelSize.smallest
+                    color: Appearance.colors.colOnLayer1Inactive
+                }
+
+                ListView {
+                    id: procList
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    visible: Monitor.gpuProcesses.length > 0
+                    clip: true
+                    // The process array is replaced every second; binding it
+                    // as the model would reset the view (and the scroll
+                    // position) on each update. Keep a constant slot count
+                    // (kMaxProcRows on the backend) and let the delegates
+                    // look their row up by index instead.
+                    model: 20
+                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                    delegate: Item {
+                        id: procRow
+                        readonly property bool hasRow: index < Monitor.gpuProcesses.length
+                        readonly property var row: hasRow ? Monitor.gpuProcesses[index]
+                            : ({ pid: 0, name: "", usage: 0, mem: -1 })
+                        width: ListView.view.width
+                        height: hasRow ? 30 : 0
+                        visible: hasRow
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.topMargin: 1
+                            anchors.bottomMargin: 1
+                            spacing: 12
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: procRow.row.name
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colOnLayer1
+                                    elide: Text.ElideRight
+                                }
+                                StyledText {
+                                    visible: procRow.row.pid >= 0
+                                    text: procRow.row.pid
+                                    font.pixelSize: Appearance.font.pixelSize.smallest
+                                    color: Appearance.colors.colOnLayer1Inactive
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.preferredWidth: 130
+                                spacing: 6
+                                Item { Layout.fillWidth: true }
+                                Rectangle {
+                                    Layout.preferredWidth: 64
+                                    Layout.preferredHeight: 6
+                                    radius: 3
+                                    color: Appearance.colors.colOutlineVariant
+                                    Rectangle {
+                                        width: parent.width * Math.min(1, Math.max(0, procRow.row.usage / 100))
+                                        height: parent.height
+                                        radius: parent.radius
+                                        color: root.usageColor
+                                    }
+                                }
+                                StyledText {
+                                    Layout.preferredWidth: 44
+                                    horizontalAlignment: Text.AlignRight
+                                    text: Math.round(procRow.row.usage) + " %"
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colOnLayer1
+                                }
+                            }
+
+                            StyledText {
+                                Layout.preferredWidth: 90
+                                horizontalAlignment: Text.AlignRight
+                                text: procRow.row.mem >= 0 ? root.formatVram(procRow.row.mem) : "—"
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                color: Appearance.colors.colOnLayer1
+                            }
+                        }
+                    }
                 }
             }
         }

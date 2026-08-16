@@ -18,6 +18,15 @@ class QElapsedTimer;
 //   - Network: per-interface traffic rates (bytes/second) computed from the
 //     cumulative byte counters in `/proc/net/dev`.
 //
+// Both monitors also build a per-process usage list on the same tick:
+//   - GPU processes: engine busy time / memory from the DRM fdinfo of each
+//     client (`/proc/<pid>/fdinfo/*`, amdgpu/i915/nouveau/...); NVIDIA goes
+//     through `nvidia-smi pmon` instead because its fds carry no fdinfo.
+//   - Network processes: per-socket byte counters (netlink INET_DIAG +
+//     tcp_info) mapped back to PIDs via the `socket:[inode]` links in
+//     `/proc/<pid>/fd`. Sockets of other users are aggregated into one
+//     "other processes" row; loopback-only peers are excluded.
+//
 // Each monitor keeps a rolling history (3 minutes at 1 sample/second) so QML
 // can draw live curves. Exposed to QML as the `Monitor` context property.
 class MonitorProbe : public QObject
@@ -34,6 +43,10 @@ class MonitorProbe : public QObject
     Q_PROPERTY(QVariantList netHistory READ netHistory NOTIFY netDataChanged)
     Q_PROPERTY(bool netRunning READ netRunning NOTIFY netRunningChanged)
 
+    // ---- per-process usage ------------------------------------------------
+    Q_PROPERTY(QVariantList gpuProcesses READ gpuProcesses NOTIFY gpuProcessesChanged)
+    Q_PROPERTY(QVariantList netProcesses READ netProcesses NOTIFY netProcessesChanged)
+
 public:
     explicit MonitorProbe(QObject *parent = nullptr);
     ~MonitorProbe() override;
@@ -45,6 +58,14 @@ public:
     QVariantList netInterfaces() const { return m_netInterfaces; }
     QVariantList netHistory() const { return m_netHistory; }
     bool netRunning() const { return m_netRunning; }
+
+    QVariantList gpuProcesses() const { return m_gpuProcesses; }
+    QVariantList netProcesses() const { return m_netProcesses; }
+
+    // Per-process details need /proc access to foreign PIDs; without root
+    // only the current user's processes can be attributed (the network list
+    // additionally aggregates the rest into an "other processes" row).
+    Q_INVOKABLE bool processesLimited() const;
 
     // Cheap capability checks, used to show/hide the entry buttons.
     Q_INVOKABLE bool supportsGpuMonitoring(const QVariantMap &device) const;
@@ -65,6 +86,8 @@ signals:
     void gpuRunningChanged();
     void netDataChanged();
     void netRunningChanged();
+    void gpuProcessesChanged();
+    void netProcessesChanged();
 
 private:
     struct GpuSource
@@ -89,11 +112,25 @@ private:
         qint64 tx = 0;
     };
 
+    // per-socket byte counters from netlink INET_DIAG (tcp_info)
+    struct SocketBytes
+    {
+        qint64 sent = 0;
+        qint64 received = 0;
+    };
+
     static QString readFile(const QString &path);
     static QString canonicalPath(const QString &path);
     static QString driverOf(const QString &anchor);
     static QString gpuNameFor(const QString &vendorHex, const QString &driver);
     static QHash<QString, NetCounters> readProcNetDev();
+
+    // per-process helpers
+    static QString fdLinkTarget(const QString &path);
+    static bool isLoopbackAddress(int family, const quint32 *addr);
+    static bool isZeroAddress(int family, const quint32 *addr);
+    static QHash<qint64, SocketBytes> inetDiagQuery(int protocol, int family);
+    static QHash<qint64, int> socketOwners(QHash<int, QString> *names);
 
     void detectGpus();
     void setupGpuSources(const QVariantMap &device);
@@ -106,6 +143,12 @@ private:
     void updateNetInterfaces();
     void sampleNet();
     void rebuildNetHistory();
+
+    // per-process sampling (called from sampleGpu/sampleNet while running)
+    QStringList drmDeviceNodesOf(const QString &anchor) const;
+    int nvidiaIndexOf(const QString &pdev) const;
+    void sampleGpuProcesses(const GpuSource &s, double vramTotal);
+    void sampleNetProcesses();
 
     QVariantList m_gpus;         // { id, name, driver, busySupported, vramSupported, monitorable }
     QList<GpuSource> m_gpuSources;
@@ -128,5 +171,17 @@ private:
     bool m_netRunning = false;
     qint64 m_netLastMsec = 0;
 
-    static constexpr int kMaxSamples = 180; // 3 minutes at 1 sample/second
+    // ---- per-process usage ---------------------------------------------
+    QVariantList m_gpuProcesses;       // { pid, name, usage, mem }
+    QVariantList m_netProcesses;       // { pid, name, rx, tx, sockets }
+    QHash<QString, qint64> m_gpuEngineLast; // "pid:fd" -> cumulative engine ns
+    QHash<int, QPair<qint64, qint64>> m_netProcLast; // pid -> (inB, outB)
+    QString m_gpuPdev;                 // PCI address of the monitored GPU
+    QStringList m_drmNodes;            // /dev/dri nodes of the monitored GPU
+    int m_nvidiaIndex = -1;            // nvidia-smi index of the monitored GPU
+    qint64 m_gpuProcLastMsec = 0;
+    qint64 m_netProcLastMsec = 0;
+
+    static constexpr int kMaxSamples = 180;   // 3 minutes at 1 sample/second
+    static constexpr int kMaxProcRows = 20;   // per-process list length cap
 };

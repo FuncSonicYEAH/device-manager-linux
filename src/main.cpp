@@ -123,8 +123,50 @@ int main(int argc, char *argv[])
         }
         if (iface.isEmpty())
             return 0;
+        // exercise the per-process lists too: start the first monitorable GPU
+        QVariantMap gpuDev;
+        for (const QVariant &gv : gpus) {
+            const QVariantMap g = gv.toMap();
+            if (g.value(QStringLiteral("monitorable")).toBool()) {
+                gpuDev.insert(QStringLiteral("sysfsPath"), g.value(QStringLiteral("id")));
+                break;
+            }
+        }
+        if (!gpuDev.isEmpty())
+            probe.startGpu(gpuDev);
         probe.startNet(iface);
         QTimer::singleShot(3300, [&]() {
+            if (!gpuDev.isEmpty()) {
+                printf("GPU history: %d points\n", int(probe.gpuHistory().size()));
+                for (const QVariant &hv : probe.gpuHistory()) {
+                    const QVariantMap h = hv.toMap();
+                    printf("  t=%-4d usage=%5.1f%% vram=%s\n",
+                           h.value(QStringLiteral("time")).toInt(),
+                           h.value(QStringLiteral("usage")).toDouble(),
+                           qPrintable(QString::number(h.value(QStringLiteral("vramUsed")).toDouble())));
+                }
+                const QVariantList gprocs = probe.gpuProcesses();
+                printf("GPU processes: %d\n", int(gprocs.size()));
+                for (const QVariant &pv : gprocs) {
+                    const QVariantMap p = pv.toMap();
+                    printf("  pid=%-7d %-16.16s usage=%5.1f%% mem=%s\n",
+                           p.value(QStringLiteral("pid")).toInt(),
+                           qPrintable(p.value(QStringLiteral("name")).toString()),
+                           p.value(QStringLiteral("usage")).toDouble(),
+                           qPrintable(QString::number(p.value(QStringLiteral("mem")).toDouble())));
+                }
+            }
+            const QVariantList nprocs = probe.netProcesses();
+            printf("Network processes: %d\n", int(nprocs.size()));
+            for (const QVariant &pv : nprocs) {
+                const QVariantMap p = pv.toMap();
+                printf("  pid=%-7d %-16.16s rx=%9.1f B/s tx=%9.1f B/s sockets=%d\n",
+                       p.value(QStringLiteral("pid")).toInt(),
+                       qPrintable(p.value(QStringLiteral("name")).toString()),
+                       p.value(QStringLiteral("rx")).toDouble(),
+                       p.value(QStringLiteral("tx")).toDouble(),
+                       p.value(QStringLiteral("sockets")).toInt());
+            }
             printf("Network sample on '%s': %d points\n", qPrintable(iface), int(probe.netHistory().size()));
             for (const QVariant &hv : probe.netHistory()) {
                 const QVariantMap h = hv.toMap();
