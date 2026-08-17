@@ -39,6 +39,30 @@ Button {
         : (root.down ? colBackgroundActive : root.hovered ? colBackgroundHover : colBackground)
     property color rippleColor: root.toggled ? colRippleToggled : colRipple
 
+    // Default size for text buttons: the width is derived from the label
+    // length (full-width glyphs like CJK take a whole em, latin/digits
+    // roughly half) plus horizontal padding, so the button fits its text in
+    // every language. Callers override implicitWidth/implicitHeight for
+    // icon-only buttons or buttons stretched by a layout.
+    function textButtonWidth(text) {
+        if (text === undefined || text === null)
+            return 0
+        var full = Appearance.font.pixelSize.small
+        var half = Math.round(full * 0.55)
+        var w = 0
+        for (var i = 0; i < text.length; i++) {
+            var code = text.charCodeAt(i)
+            if (code > 0x2E7F)
+                w += full
+            else
+                w += half
+        }
+        return w + 24 // horizontal padding
+    }
+
+    implicitWidth: root.textButtonWidth(root.buttonText)
+    implicitHeight: 36
+
     function startRipple(x, y) {
         const stateY = buttonBackground.y;
         rippleAnim.x = x;

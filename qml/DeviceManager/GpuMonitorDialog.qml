@@ -553,8 +553,6 @@ AnimatedDialog {
                     ? Tr.t("stopMonitoring", Tr.language)
                     : Tr.t("startMonitoring", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 110
-                implicitHeight: 34
                 enabled: root.supported
                 onClicked: {
                     if (root.running)
@@ -566,8 +564,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("clear", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 enabled: root.history.length > 0
                 onClicked: Monitor.clearGpu()
             }
@@ -575,8 +571,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("close", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
         }

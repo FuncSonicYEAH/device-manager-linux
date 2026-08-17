@@ -265,16 +265,12 @@ AnimatedDialog {
                 visible: !root.running && !root.done
                 buttonText: Tr.t("cancel", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
             RippleButton {
                 visible: !root.running && !root.done
                 buttonText: Tr.t("confirm", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 colBackground: Appearance.m3colors.m3tertiaryContainer
                 colBackgroundHover: Appearance.m3colors.m3tertiaryContainer
                 colBackgroundActive: Appearance.m3colors.m3tertiaryContainer
@@ -290,8 +286,6 @@ AnimatedDialog {
                 visible: root.done
                 buttonText: Tr.t("close", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
         }

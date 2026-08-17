@@ -101,8 +101,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("close", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
         }

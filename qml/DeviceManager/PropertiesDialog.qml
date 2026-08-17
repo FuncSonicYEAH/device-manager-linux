@@ -87,8 +87,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("general", Tr.language)
                 buttonRadius: Appearance.rounding.full
-                implicitWidth: 76
-                implicitHeight: 30
                 toggled: root.currentTab === 0
                 colBackgroundToggled: Appearance.colors.colSecondaryContainer
                 colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
@@ -98,8 +96,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("details", Tr.language)
                 buttonRadius: Appearance.rounding.full
-                implicitWidth: 96
-                implicitHeight: 30
                 toggled: root.currentTab === 1
                 colBackgroundToggled: Appearance.colors.colSecondaryContainer
                 colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
@@ -184,16 +180,12 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("refresh", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.refreshRequested()
             }
             Item { Layout.fillWidth: true }
             RippleButton {
                 buttonText: Tr.t("close", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
         }

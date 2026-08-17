@@ -471,8 +471,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("refresh", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 enabled: !root.loading
                 onClicked: root.startRead()
             }
@@ -480,8 +478,6 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("close", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
         }

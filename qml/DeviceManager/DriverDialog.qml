@@ -203,8 +203,6 @@ AnimatedDialog {
                 buttonText: Tr.t("driversMissingTab", Tr.language)
                     + " (" + Drivers.missingDrivers.length + ")"
                 buttonRadius: Appearance.rounding.full
-                implicitWidth: 116
-                implicitHeight: 30
                 toggled: root.currentTab === 0
                 colBackgroundToggled: Appearance.colors.colSecondaryContainer
                 colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
@@ -215,8 +213,6 @@ AnimatedDialog {
                 buttonText: Tr.t("driversModulesTab", Tr.language)
                     + " (" + Drivers.loadedModules.length + ")"
                 buttonRadius: Appearance.rounding.full
-                implicitWidth: 116
-                implicitHeight: 30
                 toggled: root.currentTab === 1
                 colBackgroundToggled: Appearance.colors.colSecondaryContainer
                 colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
@@ -227,8 +223,6 @@ AnimatedDialog {
                 buttonText: Tr.t("proprietaryTab", Tr.language)
                     + " (" + root.proprietaryOptions.length + ")"
                 buttonRadius: Appearance.rounding.full
-                implicitWidth: 116
-                implicitHeight: 30
                 toggled: root.currentTab === 2
                 colBackgroundToggled: Appearance.colors.colSecondaryContainer
                 colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
@@ -394,8 +388,6 @@ AnimatedDialog {
                                             enabled: !Drivers.busy
                                             buttonText: Tr.t("loadModuleBtn", Tr.language)
                                             buttonRadius: Appearance.rounding.full
-                                            implicitWidth: 64
-                                            implicitHeight: 26
                                             onClicked: Drivers.loadModule(modelData.module)
                                         }
                                     }
@@ -428,8 +420,6 @@ AnimatedDialog {
                                             && Drivers.packageBackend !== "unknown"
                                         buttonText: Tr.t("searchPackagesBtn", Tr.language)
                                         buttonRadius: Appearance.rounding.small
-                                        implicitWidth: 110
-                                        implicitHeight: 28
                                         onClicked: {
                                             var s = Object.assign({}, root.searchingIds)
                                             s[modelData.id] = true
@@ -512,8 +502,6 @@ AnimatedDialog {
                                             enabled: !Drivers.busy
                                             buttonText: Tr.t("installPackageBtn", Tr.language)
                                             buttonRadius: Appearance.rounding.full
-                                            implicitWidth: 64
-                                            implicitHeight: 26
                                             colBackground: Appearance.m3colors.m3tertiaryContainer
                                             colBackgroundHover: Appearance.m3colors.m3tertiaryContainer
                                             colBackgroundActive: Appearance.m3colors.m3tertiaryContainer
@@ -551,8 +539,6 @@ AnimatedDialog {
                                     enabled: !Drivers.busy
                                     buttonText: Tr.t("probeDeviceBtn", Tr.language)
                                     buttonRadius: Appearance.rounding.small
-                                    implicitWidth: 96
-                                    implicitHeight: 28
                                     onClicked: Drivers.probeDevice(dev)
                                 }
                                 Item { Layout.fillWidth: true }
@@ -701,8 +687,6 @@ AnimatedDialog {
                                         enabled: !Drivers.busy
                                         buttonText: Tr.t("unloadModuleBtn", Tr.language)
                                         buttonRadius: Appearance.rounding.small
-                                        implicitWidth: 96
-                                        implicitHeight: 26
                                         onClicked: root.confirmUnloadModule = modelData.name
                                     }
                                 }
@@ -725,16 +709,12 @@ AnimatedDialog {
                                         RippleButton {
                                             buttonText: Tr.t("cancel", Tr.language)
                                             buttonRadius: Appearance.rounding.small
-                                            implicitWidth: 64
-                                            implicitHeight: 26
                                             onClicked: root.confirmUnloadModule = ""
                                         }
                                         RippleButton {
                                             enabled: !Drivers.busy
                                             buttonText: Tr.t("confirm", Tr.language)
                                             buttonRadius: Appearance.rounding.small
-                                            implicitWidth: 64
-                                            implicitHeight: 26
                                             colBackground: Appearance.m3colors.m3errorContainer
                                             colBackgroundHover: Appearance.m3colors.m3errorContainer
                                             colBackgroundActive: Appearance.m3colors.m3errorContainer
@@ -878,8 +858,6 @@ AnimatedDialog {
                                     enabled: !Drivers.busy
                                     buttonText: Tr.t("installPackageBtn", Tr.language)
                                     buttonRadius: Appearance.rounding.full
-                                    implicitWidth: 72
-                                    implicitHeight: 26
                                     colBackground: Appearance.m3colors.m3tertiaryContainer
                                     colBackgroundHover: Appearance.m3colors.m3tertiaryContainer
                                     colBackgroundActive: Appearance.m3colors.m3tertiaryContainer
@@ -978,16 +956,12 @@ AnimatedDialog {
             RippleButton {
                 buttonText: Tr.t("rescan", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 96
-                implicitHeight: 34
                 onClicked: root.rescan()
             }
             Item { Layout.fillWidth: true }
             RippleButton {
                 buttonText: Tr.t("close", Tr.language)
                 buttonRadius: Appearance.rounding.small
-                implicitWidth: 80
-                implicitHeight: 34
                 onClicked: root.close()
             }
         }

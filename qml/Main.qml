@@ -213,24 +213,25 @@ ApplicationWindow {
         // ---- titlebar -----------------------------------------------------
         Item {
             Layout.fillWidth: true
-            implicitHeight: windowControlsRow.implicitHeight
+            implicitHeight: Math.max(windowControlsRow.implicitHeight, viewSwitcher.implicitHeight)
 
             Rectangle { // segmented view switcher
+                id: viewSwitcher
                 anchors {
                     left: parent.left
                     verticalCenter: parent.verticalCenter
                 }
-                width: 172
-                height: 35
+                implicitWidth: viewSwitcherRow.implicitWidth
+                implicitHeight: viewSwitcherRow.implicitHeight
                 radius: Appearance.rounding.small
                 color: Appearance.colors.colLayer1Hover
 
                 RowLayout {
-                    anchors.fill: parent
+                    id: viewSwitcherRow
+                    anchors.centerIn: parent
                     spacing: 4
                     RippleButton {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        buttonText: Tr.t("byType", Tr.language)
                         buttonRadius: Appearance.rounding.small
                         toggled: root.viewMode === "type"
                         colBackgroundToggled: Appearance.colors.colSecondaryContainer
@@ -247,8 +248,7 @@ ApplicationWindow {
                         }
                     }
                     RippleButton {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        buttonText: Tr.t("byConnection", Tr.language)
                         buttonRadius: Appearance.rounding.small
                         toggled: root.viewMode === "connection"
                         colBackgroundToggled: Appearance.colors.colSecondaryContainer
