@@ -1,5 +1,8 @@
 // Two-level device tree: expandable categories with device rows underneath.
-// Rows are rebuilt into a plain JS array so the delegates stay simple.
+// Rows live in a ListModel that rebuild() patches incrementally (diff against
+// the previous row list), so unchanged rows keep their delegates and the
+// add/remove/displaced transitions only run for rows that really changed —
+// that is what makes category expand/collapse animate.
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -55,7 +58,7 @@ Item {
                         out.push(root.rowForDevice(devs[e], group))
             }
         }
-        root.rows = out
+        applyRows(out)
     }
 
     function rowForDevice(dev, group) {
@@ -67,6 +70,55 @@ Item {
             name: dev.name,
             subtitle: dev.subtitle,
             dev: dev
+        }
+    }
+
+    // Stable identity of a row across rebuilds; rows never reorder, they are
+    // only inserted/removed in place, so key comparison drives the diff below.
+    function rowKey(r) {
+        return r.kind === "category" ? "c:" + r.key : "d:" + r.id
+    }
+
+    function rowsEqual(a, b) {
+        if (rowKey(a) !== rowKey(b))
+            return false
+        if (a.kind === "category")
+            return a.name === b.name && a.icon === b.icon
+                    && a.count === b.count && a.expanded === b.expanded
+        return a.icon === b.icon && a.status === b.status && a.name === b.name
+                && a.subtitle === b.subtitle && a.dev === b.dev
+    }
+
+    // Apply the target row list to rowModel with minimal edits (update in
+    // place / insert / remove) instead of resetting the model, so the view can
+    // animate only the rows that actually changed.
+    function applyRows(out) {
+        var present = {}
+        for (var k = 0; k < out.length; k++)
+            present[rowKey(out[k])] = true
+        var i = 0, j = 0
+        while (j < out.length) {
+            if (i < root.rows.length && rowKey(root.rows[i]) === rowKey(out[j])) {
+                if (!rowsEqual(root.rows[i], out[j]))
+                    rowModel.set(i, { rowData: out[j] })
+                root.rows[i] = out[j]
+                i++
+                j++
+                continue
+            }
+            if (i < root.rows.length && !present[rowKey(root.rows[i])]) {
+                rowModel.remove(i, 1)
+                root.rows.splice(i, 1)
+                continue
+            }
+            rowModel.insert(i, { rowData: out[j] })
+            root.rows.splice(i, 0, out[j])
+            i++
+            j++
+        }
+        while (i < root.rows.length) {
+            rowModel.remove(i, 1)
+            root.rows.splice(i, 1)
         }
     }
 
@@ -94,23 +146,77 @@ Item {
     onSearchTextChanged: root.rebuild()
     onExpandedKeysChanged: root.rebuild()
 
+    ListModel {
+        id: rowModel
+    }
+
     ListView {
         id: listView
         anchors.fill: parent
         clip: true
-        model: root.rows
+        model: rowModel
         spacing: 2
         topMargin: 4
         bottomMargin: 4
         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-        delegate: Loader {
-            required property var modelData
-            width: listView.width
-            sourceComponent: modelData.kind === "category" ? categoryComponent : deviceComponent
-            onLoaded: {
-                item.rowData = modelData
+        // Expand/collapse: device rows grow from small to full size while
+        // fading in; on collapse they shrink upward into the category while
+        // fading out. Every row stays inside its own layout slot during the
+        // animation (nothing slides over a neighbour), so the texts of two
+        // rows never cross; the rows below slide up or down into the vacated
+        // space. Unchanged rows are never touched (see applyRows).
+        add: Transition {
+            NumberAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Appearance.animation.elementMoveEnter.duration
+                easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve
             }
+            NumberAnimation {
+                property: "scale"
+                from: 0.8
+                to: 1
+                duration: Appearance.animation.elementMoveEnter.duration
+                easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve
+            }
+        }
+        remove: Transition {
+            // Collapse toward the category header: the decel curve shrinks the
+            // row out of the way before the rows below slide up into its
+            // slot, so their texts never overlap.
+            PropertyAction {
+                property: "transformOrigin"
+                value: Item.Top
+            }
+            NumberAnimation {
+                property: "opacity"
+                to: 0
+                duration: Appearance.animation.elementMoveExit.duration
+                easing.bezierCurve: Appearance.animationCurves.emphasizedDecel
+            }
+            NumberAnimation {
+                property: "scale"
+                to: 0.05
+                duration: Appearance.animation.elementMoveExit.duration
+                easing.bezierCurve: Appearance.animationCurves.emphasizedDecel
+            }
+        }
+        displaced: Transition {
+            NumberAnimation {
+                property: "y"
+                duration: Appearance.animation.elementMoveFast.duration
+                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+            }
+        }
+
+        delegate: Loader {
+            required property var rowData
+            width: listView.width
+            sourceComponent: rowData.kind === "category" ? categoryComponent : deviceComponent
+            onLoaded: item.rowData = rowData
+            onRowDataChanged: if (item) item.rowData = rowData
         }
     }
 
@@ -134,12 +240,16 @@ Item {
                 spacing: 8
 
                 MaterialSymbol {
-                    text: rowData.expanded ? "expand_more" : "chevron_right"
+                    text: "expand_more"
                     iconSize: 18
                     color: Appearance.colors.colOnLayer1Inactive
                     Layout.preferredWidth: 18
+                    rotation: rowData.expanded ? 0 : -90
                     Behavior on rotation {
-                        NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
+                        NumberAnimation {
+                            duration: Appearance.animation.elementMoveFast.duration
+                            easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                        }
                     }
                 }
                 MaterialSymbol {
